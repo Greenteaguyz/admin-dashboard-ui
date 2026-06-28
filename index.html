@@ -1,0 +1,334 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Greylux — Overview</title>
+
+  <!-- Pre-paint state (blocking): apply persisted gl-theme + gl-sidebar before first paint -->
+  <script>
+    (function () {
+      try {
+        if (localStorage.getItem('gl-theme') === 'dark') {
+          document.documentElement.setAttribute('data-theme', 'dark');
+        }
+        if (localStorage.getItem('gl-sidebar') === 'collapsed') {
+          document.documentElement.setAttribute('data-sidebar', 'collapsed');
+        }
+      } catch (e) { /* best-effort: fall back to documented defaults */ }
+    })();
+  </script>
+
+  <!-- CDN CSS (pinned) — loaded before local CSS so local tokens override Bootstrap -->
+  <link
+    href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css"
+    rel="stylesheet"
+    integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH"
+    crossorigin="anonymous" />
+  <link
+    href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css"
+    rel="stylesheet" />
+
+  <!-- Google Fonts: DM Sans 400/500/700, JetBrains Mono 500/600 -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link
+    href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;700&family=JetBrains+Mono:wght@500;600&display=swap"
+    rel="stylesheet" />
+
+  <!-- Local CSS — load order contract: tokens → layout → components → theme -->
+  <link rel="stylesheet" href="css/tokens.css" />
+  <link rel="stylesheet" href="css/layout.css" />
+  <link rel="stylesheet" href="css/components.css" />
+  <link rel="stylesheet" href="css/theme.css" />
+
+  <!-- ApexCharts (pinned) — chart page: loaded in <head> per convention -->
+  <script src="https://cdn.jsdelivr.net/npm/apexcharts@3.49.0/dist/apexcharts.min.js"></script>
+</head>
+<body>
+  <div class="gl-shell">
+    <!-- Sidebar -->
+    <aside class="gl-sidebar">
+      <div class="gl-brand">
+        <span class="gl-brand-mark">GL</span>
+        <span class="gl-brand-label">greylux</span>
+      </div>
+
+      <nav class="gl-nav" aria-label="Primary">
+        <div class="gl-nav-group">
+          <p class="gl-nav-group-title">Main</p>
+          <a class="gl-nav-item is-active" href="index.html" aria-current="page">
+            <i class="bi bi-house-door gl-nav-icon" aria-hidden="true"></i>
+            <span class="gl-nav-label">Overview</span>
+          </a>
+          <a class="gl-nav-item" href="analytics.html">
+            <i class="bi bi-bar-chart-line gl-nav-icon" aria-hidden="true"></i>
+            <span class="gl-nav-label">Analytics</span>
+          </a>
+          <a class="gl-nav-item" href="users.html">
+            <i class="bi bi-people gl-nav-icon" aria-hidden="true"></i>
+            <span class="gl-nav-label">Users</span>
+          </a>
+        </div>
+
+        <div class="gl-nav-group">
+          <p class="gl-nav-group-title">Account</p>
+          <a class="gl-nav-item" href="settings.html">
+            <i class="bi bi-sliders gl-nav-icon" aria-hidden="true"></i>
+            <span class="gl-nav-label">Settings</span>
+          </a>
+          <a class="gl-nav-item" href="login.html">
+            <i class="bi bi-box-arrow-right gl-nav-icon" aria-hidden="true"></i>
+            <span class="gl-nav-label">Logout</span>
+          </a>
+        </div>
+      </nav>
+
+      <div class="gl-user">
+        <span class="gl-avatar" aria-hidden="true">MR</span>
+        <div class="gl-user-meta">
+          <span class="gl-user-name">Morgan Reyes</span>
+          <span class="gl-user-role">Administrator</span>
+        </div>
+      </div>
+    </aside>
+
+    <!-- Main column -->
+    <div class="gl-main">
+      <header class="gl-topbar">
+        <button type="button" class="gl-icon-btn gl-sidebar-toggle" id="gl-sidebar-toggle"
+          aria-label="Toggle sidebar">
+          <i class="bi bi-list" aria-hidden="true"></i>
+        </button>
+
+        <div class="gl-topbar-actions">
+          <button type="button" class="gl-icon-btn gl-theme-toggle" id="gl-theme-toggle"
+            data-theme-toggle aria-label="Toggle theme" aria-pressed="false">
+            <i class="bi bi-moon-fill" aria-hidden="true"></i>
+          </button>
+          <button type="button" class="gl-icon-btn gl-notif" aria-label="Notifications">
+            <i class="bi bi-bell" aria-hidden="true"></i>
+            <span class="gl-notif-dot" aria-hidden="true"></span>
+          </button>
+        </div>
+      </header>
+
+      <main class="gl-content">
+        <div class="gl-content-inner">
+          <h1 class="gl-page-title">Overview</h1>
+
+          <!-- Row 1 — KPI row (rendered via renderWithSkeleton → renderKpiRow). -->
+          <div id="gl-kpi-row" class="gl-kpi-section"></div>
+
+          <!-- Row 2 — Recent Transactions (col-lg-8) + Account Distribution donut
+               placeholder (col-lg-4, filled by task 6.3). -->
+          <div class="row g-4 mt-1">
+            <div class="col-lg-8">
+              <section class="gl-panel" aria-labelledby="gl-recent-txn-title">
+                <header class="gl-panel-header">
+                  <h2 class="gl-panel-title" id="gl-recent-txn-title">Recent Transactions</h2>
+                  <a class="gl-view-all" href="users.html#transactions">VIEW ALL &rarr;</a>
+                </header>
+                <div id="gl-recent-txn"></div>
+              </section>
+            </div>
+            <div class="col-lg-4">
+              <section class="gl-panel" aria-labelledby="gl-donut-title">
+                <header class="gl-panel-header">
+                  <h2 class="gl-panel-title" id="gl-donut-title">Account Distribution</h2>
+                </header>
+                <!-- Donut container — task 6.3 renders the ApexCharts donut here. -->
+                <div id="gl-donut-account-dist"></div>
+              </section>
+            </div>
+          </div>
+        </div>
+      </main>
+    </div>
+  </div>
+
+  <!-- CDN JS (pinned) before </body> -->
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"
+    integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz"
+    crossorigin="anonymous"></script>
+  <!-- Local JS modules (ES modules: self-wire shell interactions / expose globals) -->
+  <script type="module" src="js/theme.js"></script>
+  <script type="module" src="js/sidebar.js"></script>
+  <script type="module" src="js/charts.js"></script>
+
+  <!-- Page module — Overview data + rendering (task 6.2; donut added in 6.3). -->
+  <script type="module">
+    import { renderKpiRow, renderStatusBadge, computeAccountDistribution } from './js/render.js';
+    import { formatCurrency, formatDate, renderWithSkeleton } from './js/utils.js';
+    import { CHART_DEFAULTS, registerChart } from './js/charts.js';
+
+    // -- Mock data (API-ready) ----------------------------------------------
+    // Six KPI cards in fixed display order (see design.md "Data Models — KPI").
+    // Replace with fetch('/api/kpi') when API is ready
+    const MOCK_KPI = [
+      { id: 'total_deposits', label: 'Total Deposits', value: 48250000.00, isCurrency: true,
+        delta: 4.2, deltaKind: 'percent' },
+      { id: 'total_withdrawals', label: 'Total Withdrawals', value: 12880000.00, isCurrency: true,
+        delta: -2.1, deltaKind: 'percent', colorOverride: 'warning' },
+      { id: 'net_cash_position', label: 'Net Cash Position', value: 35370000.00, isCurrency: true,
+        delta: 6.8, deltaKind: 'percent' },
+      { id: 'active_accounts', label: 'Active Accounts', value: 18432, isCurrency: false,
+        delta: 1.5, deltaKind: 'percent' },
+      { id: 'pending_transactions', label: 'Pending Transactions', value: 142, isCurrency: false,
+        delta: -12, deltaKind: 'absolute', invertedSign: true },
+      { id: 'txn_volume_24h', label: 'Transaction Volume (24H)', value: 9210000.00, isCurrency: true,
+        delta: 3.3, deltaKind: 'percent' }
+    ];
+
+    // Recent transactions ({ txnId, account, type, amount, status, timestamp }).
+    // At least 10 records so the 8-most-recent view always has data to sort/slice.
+    // Replace with fetch('/api/transactions?limit=8') when API is ready
+    const MOCK_RECENT_TXN = [
+      { txnId: 'TXN-100482', account: 'ACC-4471', type: 'Deposit',    amount: 12500.00, status: 'Completed', timestamp: '2024-06-12T14:32:00Z' },
+      { txnId: 'TXN-100481', account: 'ACC-2210', type: 'Withdrawal', amount: 3200.00,  status: 'Pending',   timestamp: '2024-06-12T13:58:00Z' },
+      { txnId: 'TXN-100480', account: 'ACC-9087', type: 'Transfer',   amount: 18750.50, status: 'Completed', timestamp: '2024-06-12T12:11:00Z' },
+      { txnId: 'TXN-100479', account: 'ACC-5532', type: 'Deposit',    amount: 640.00,   status: 'Completed', timestamp: '2024-06-12T10:47:00Z' },
+      { txnId: 'TXN-100478', account: 'ACC-4471', type: 'Withdrawal', amount: 5000.00,  status: 'Failed',    timestamp: '2024-06-12T09:25:00Z' },
+      { txnId: 'TXN-100477', account: 'ACC-3344', type: 'Transfer',   amount: 27300.00, status: 'Completed', timestamp: '2024-06-11T18:03:00Z' },
+      { txnId: 'TXN-100476', account: 'ACC-7781', type: 'Deposit',    amount: 9999.99,  status: 'Pending',   timestamp: '2024-06-11T16:40:00Z' },
+      { txnId: 'TXN-100475', account: 'ACC-2210', type: 'Withdrawal', amount: 1450.25,  status: 'Completed', timestamp: '2024-06-11T15:12:00Z' },
+      { txnId: 'TXN-100474', account: 'ACC-6620', type: 'Deposit',    amount: 84200.00, status: 'Completed', timestamp: '2024-06-11T11:55:00Z' },
+      { txnId: 'TXN-100473', account: 'ACC-9087', type: 'Transfer',   amount: 320.75,   status: 'Failed',    timestamp: '2024-06-10T22:18:00Z' },
+      { txnId: 'TXN-100472', account: 'ACC-5532', type: 'Deposit',    amount: 6100.00,  status: 'Completed', timestamp: '2024-06-10T19:44:00Z' },
+      { txnId: 'TXN-100471', account: 'ACC-3344', type: 'Withdrawal', amount: 2750.00,  status: 'Pending',   timestamp: '2024-06-10T08:30:00Z' }
+    ];
+
+    // Account sample for the Account Distribution donut. Co-located here to preserve
+    // file-level isolation — index.html does NOT import users.html's data. Counts are
+    // chosen to approximate the reference split Checking 52% / Savings 33% / Business
+    // 15% (52 / 33 / 15 of 100 accounts); computeAccountDistribution() derives the
+    // percentages from these counts at render time (Req 6.1, 6.2 — computed, not hardcoded).
+    // Replace with fetch('/api/accounts') when API is ready
+    const MOCK_ACCOUNTS = [
+      ...Array.from({ length: 52 }, (_, i) => ({ accountId: `ACC-C${i + 1}`, type: 'Checking' })),
+      ...Array.from({ length: 33 }, (_, i) => ({ accountId: `ACC-S${i + 1}`, type: 'Savings' })),
+      ...Array.from({ length: 15 }, (_, i) => ({ accountId: `ACC-B${i + 1}`, type: 'Business' }))
+    ];
+
+    // -- Helpers ------------------------------------------------------------
+    // Minimal escaper for any data interpolated as table cell text.
+    function escapeHtml(value) {
+      return String(value).replace(/[&<>"']/g, (ch) => (
+        { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[ch]
+      ));
+    }
+
+    // 8 most recent transactions, sorted by timestamp descending (Req 5.1).
+    function recentTransactions(list) {
+      return [...list]
+        .sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp))
+        .slice(0, 8);
+    }
+
+    // Builds the Recent Transactions table HTML string (Req 5.4, 5.5, 5.6).
+    function renderTransactionsTable(txns) {
+      const rows = txns.map((t) => (
+        '<tr>' +
+        `<td class="gl-table__mono">${escapeHtml(t.txnId)}</td>` +
+        `<td class="gl-table__mono">${escapeHtml(t.account)}</td>` +
+        `<td>${escapeHtml(t.type)}</td>` +
+        `<td class="gl-table__amount">${escapeHtml(formatCurrency(t.amount))}</td>` +
+        `<td>${renderStatusBadge(t.status)}</td>` +
+        `<td class="gl-table__time">${escapeHtml(formatDate(t.timestamp))}</td>` +
+        '</tr>'
+      )).join('');
+
+      return (
+        '<div class="table-responsive">' +
+        '<table class="table gl-table">' +
+        '<thead><tr>' +
+        '<th scope="col">TXN ID</th>' +
+        '<th scope="col">Account</th>' +
+        '<th scope="col">Type</th>' +
+        '<th scope="col" class="gl-table__amount">Amount</th>' +
+        '<th scope="col">Status</th>' +
+        '<th scope="col">Timestamp</th>' +
+        '</tr></thead>' +
+        `<tbody>${rows}</tbody>` +
+        '</table>' +
+        '</div>'
+      );
+    }
+
+    // -- Render (DataUtils loading contract: renderWithSkeleton) ------------
+    const kpiContainer = document.getElementById('gl-kpi-row');
+    const txnContainer = document.getElementById('gl-recent-txn');
+
+    renderWithSkeleton(kpiContainer, () => MOCK_KPI, (kpis) => renderKpiRow(kpis));
+    renderWithSkeleton(
+      txnContainer,
+      () => recentTransactions(MOCK_RECENT_TXN),
+      (txns) => renderTransactionsTable(txns)
+    );
+
+    // -- Account Distribution donut (Req 6.1–6.6) ---------------------------
+    // ApexCharts options are plain JS, so var() can't be used — every color is
+    // resolved from the live :root at render time via getComputedStyle (token rule).
+    const donutContainer = document.getElementById('gl-donut-account-dist');
+    const token = (name) =>
+      getComputedStyle(document.documentElement).getPropertyValue(name).trim();
+    const currentTheme = () =>
+      document.documentElement.getAttribute('data-theme') === 'dark' ? 'dark' : 'light';
+    // Apply an alpha to a hex token so monochrome segments are --text opacity variants.
+    function hexToRgba(hex, alpha) {
+      const h = String(hex).replace('#', '');
+      const full = h.length === 3 ? h.split('').map((c) => c + c).join('') : h;
+      const r = parseInt(full.slice(0, 2), 16);
+      const g = parseInt(full.slice(2, 4), 16);
+      const b = parseInt(full.slice(4, 6), 16);
+      return `rgba(${r}, ${g}, ${b}, ${alpha})`;
+    }
+
+    // Percentages computed from the account counts (NOT hardcoded) — Req 6.1/6.2.
+    const accountDistribution = computeAccountDistribution(MOCK_ACCOUNTS);
+
+    // Keep the page's loading contract consistent: drive the donut container through
+    // renderWithSkeleton (skeleton → data|error), then mount ApexCharts into the
+    // placed node only on the 'data' terminal state. A chart needs a live DOM node,
+    // so it renders into the mount div directly after the skeleton resolves.
+    renderWithSkeleton(
+      donutContainer,
+      () => accountDistribution,
+      () => '<div id="gl-donut-mount" class="gl-donut-mount"></div>',
+      { skeletonRows: 3 }
+    ).then((state) => {
+      if (state !== 'data') return; // error terminal state — nothing to chart
+      const mount = document.getElementById('gl-donut-mount');
+      if (!mount || typeof ApexCharts === 'undefined') return;
+
+      const accent = token('--accent');
+      const text = token('--text');
+      const borderColor = token('--border-color');
+      // Monochrome palette: --accent (cyan) on the FIRST segment ONLY; remaining
+      // segments use --text opacity variants / a gray token (never a 2nd accent fill).
+      const seriesColors = [accent, hexToRgba(text, 0.55), borderColor];
+
+      const donut = new ApexCharts(mount, {
+        ...CHART_DEFAULTS, // no animation, no toolbar, DM Sans (Req 6, 7.8 shared base)
+        chart: { ...CHART_DEFAULTS.chart, type: 'donut', height: 280 },
+        tooltip: { ...CHART_DEFAULTS.tooltip, theme: currentTheme() },
+        series: accountDistribution.map((d) => d.value),
+        labels: accountDistribution.map((d) => d.label),
+        colors: seriesColors,
+        stroke: { width: 0 },
+        dataLabels: { enabled: true, formatter: (val) => `${Math.round(val)}%` },
+        // Text labels only — suppress legend marker fill boxes (Req 6.4).
+        legend: {
+          show: true,
+          position: 'bottom',
+          labels: { colors: token('--text-muted') },
+          markers: { width: 0, height: 0 },
+        },
+      });
+      donut.render();
+      // Unique registry key — does not collide with analytics.html's 'distroChart' (Req 6.5, 13.1/13.2).
+      registerChart('overviewDistroChart', donut);
+    });
+  </script>
+</body>
+</html>

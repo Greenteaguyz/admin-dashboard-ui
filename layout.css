@@ -1,0 +1,354 @@
+/* =============================================================================
+ * Greylux — layout.css
+ * Shell structure: collapsible sidebar, flat topbar, content grid.
+ * Load order contract: tokens.css -> layout.css -> components.css -> theme.css
+ * -----------------------------------------------------------------------------
+ * Rules honored here:
+ *  - Sidebar text/icons use --sidebar-text / --sidebar-text-muted ONLY
+ *    (never --text, which flips with theme and would be unreadable on the
+ *    always-dark sidebar in light mode).
+ *  - Zero literal color values: every value comes from a token.
+ *  - Every interactive shell element exposes a visible :focus-visible ring
+ *    built from --focus-ring.
+ *  - Collapsed state is driven by [data-sidebar="collapsed"] on <html>.
+ * ========================================================================== */
+
+/* ---- Base page ---------------------------------------------------------- */
+html,
+body {
+  height: 100%;
+}
+
+body {
+  margin: 0;
+  font-family: var(--font-ui);
+  background: var(--bg-content);
+  color: var(--text);
+}
+
+/* ---- Shell grid: sidebar + main column ---------------------------------- */
+.gl-shell {
+  display: grid;
+  grid-template-columns: var(--gl-sidebar-w, 240px) 1fr;
+  min-height: 100vh;
+}
+
+:root {
+  --gl-sidebar-w: 240px;
+  --gl-sidebar-w-collapsed: 64px;
+}
+
+/* =============================================================================
+ * Sidebar
+ * ========================================================================== */
+.gl-sidebar {
+  grid-column: 1;
+  display: flex;
+  flex-direction: column;
+  background: var(--sidebar-bg);
+  color: var(--sidebar-text);
+  padding: var(--space-4) var(--space-3);
+  border-right: var(--border);
+  position: sticky;
+  top: 0;
+  height: 100vh;
+  overflow-x: hidden;
+  transition: width 0.18s ease;
+}
+
+/* ---- Brand ---- */
+.gl-brand {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  padding: var(--space-2) var(--space-2);
+  margin-bottom: var(--space-5);
+  min-height: 44px;
+}
+
+.gl-brand-mark {
+  flex: 0 0 auto;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  border-radius: var(--space-2);
+  background: var(--accent);
+  color: var(--sidebar-bg);
+  font-family: var(--font-mono);
+  font-weight: 600;
+  font-size: 14px;
+  line-height: 1;
+}
+
+.gl-brand-label {
+  font-family: var(--font-ui);
+  font-weight: 400;
+  font-size: 11px;
+  letter-spacing: 0.08em;
+  text-transform: lowercase;
+  color: var(--sidebar-text-muted);
+  white-space: nowrap;
+}
+
+/* ---- Nav groups ---- */
+.gl-nav {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-5);
+  flex: 1 1 auto;
+}
+
+.gl-nav-group {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+}
+
+.gl-nav-group-title {
+  margin: 0 0 var(--space-1) 0;
+  padding: 0 var(--space-2);
+  font-family: var(--font-ui);
+  font-weight: 500;
+  font-size: 11px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--sidebar-text-muted);
+  white-space: nowrap;
+}
+
+/* ---- Nav items ---- */
+.gl-nav-item {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  min-height: 44px;            /* touch target (Req 3.7) */
+  padding: var(--space-2) var(--space-3);
+  border-radius: var(--space-2);
+  border-left: 2px solid transparent;
+  color: var(--sidebar-text-muted);
+  text-decoration: none;
+  font-size: 14px;
+  white-space: nowrap;
+  transition: color 0.15s ease;
+}
+
+.gl-nav-item .gl-nav-icon {
+  flex: 0 0 auto;
+  width: 20px;
+  font-size: 18px;
+  line-height: 1;
+  text-align: center;
+}
+
+.gl-nav-item:hover {
+  color: var(--sidebar-text);
+}
+
+/* Active page: 2px solid accent left border + accent icon, NO background fill */
+.gl-nav-item.is-active {
+  border-left-color: var(--accent);
+  color: var(--sidebar-text);
+  background: none;
+}
+
+.gl-nav-item.is-active .gl-nav-icon {
+  color: var(--accent);
+}
+
+/* ---- Bottom user block ---- */
+.gl-user {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  margin-top: var(--space-5);
+  padding: var(--space-2);
+  border-top: var(--border);
+  padding-top: var(--space-4);
+  min-height: 44px;
+}
+
+.gl-avatar {
+  flex: 0 0 auto;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  background: var(--sidebar-text-muted);
+  color: var(--sidebar-bg);
+  font-family: var(--font-mono);
+  font-weight: 600;
+  font-size: 13px;
+  line-height: 1;
+}
+
+.gl-user-meta {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+
+.gl-user-name {
+  font-size: 13px;
+  color: var(--sidebar-text);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.gl-user-role {
+  font-size: 11px;
+  color: var(--sidebar-text-muted);
+  white-space: nowrap;
+}
+
+/* =============================================================================
+ * Collapsed state — [data-sidebar="collapsed"] on <html>
+ *  64px wide, icons only; hide brand label, group titles, nav labels, and the
+ *  user name/role. Keep the "GL" monogram + avatar. Each nav item keeps its
+ *  44px touch target.
+ * ========================================================================== */
+html[data-sidebar="collapsed"] .gl-shell {
+  grid-template-columns: var(--gl-sidebar-w-collapsed) 1fr;
+}
+
+html[data-sidebar="collapsed"] .gl-sidebar {
+  width: var(--gl-sidebar-w-collapsed);
+  padding-left: var(--space-2);
+  padding-right: var(--space-2);
+  align-items: stretch;
+}
+
+html[data-sidebar="collapsed"] .gl-brand {
+  justify-content: center;
+}
+
+html[data-sidebar="collapsed"] .gl-brand-label,
+html[data-sidebar="collapsed"] .gl-nav-group-title,
+html[data-sidebar="collapsed"] .gl-nav-label,
+html[data-sidebar="collapsed"] .gl-user-meta {
+  display: none;
+}
+
+html[data-sidebar="collapsed"] .gl-nav-item {
+  justify-content: center;
+  gap: 0;
+  padding-left: var(--space-2);
+  padding-right: var(--space-2);
+}
+
+html[data-sidebar="collapsed"] .gl-user {
+  justify-content: center;
+}
+
+/* =============================================================================
+ * Main column: topbar + content
+ * ========================================================================== */
+.gl-main {
+  grid-column: 2;
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+
+/* ---- Topbar (flat: elevation-0) ---- */
+.gl-topbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-3);
+  padding: var(--space-3) var(--space-5);
+  background: var(--bg-card);
+  border-bottom: var(--border);
+  box-shadow: var(--elevation-0);
+  position: sticky;
+  top: 0;
+  z-index: var(--z-sticky);
+}
+
+.gl-topbar-actions {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+}
+
+/* ---- Icon buttons (sidebar toggle, theme toggle, notifications) ---- */
+.gl-icon-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+  padding: 0;
+  border: none;
+  border-radius: var(--space-2);
+  background: transparent;
+  color: var(--text);
+  font-size: 18px;
+  line-height: 1;
+  cursor: pointer;
+  transition: background 0.15s ease;
+}
+
+.gl-icon-btn:hover {
+  background: var(--bg-content);
+}
+
+/* Theme toggle: ThemeManager (theme.js) swaps the icon class
+   (bi-moon-fill <-> bi-sun-fill) and aria-pressed to reflect the active theme. */
+
+/* Notification bell + static red dot */
+.gl-notif {
+  position: relative;
+}
+
+.gl-notif-dot {
+  position: absolute;
+  top: 8px;
+  right: 9px;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--danger);
+  box-shadow: 0 0 0 2px var(--bg-card);
+}
+
+/* ---- Content area: max width + consistent gutters ---- */
+.gl-content {
+  flex: 1 1 auto;
+  padding: var(--space-6) var(--space-5);
+}
+
+.gl-content-inner {
+  width: 100%;
+  max-width: 1440px;
+  margin: 0 auto;
+}
+
+/* =============================================================================
+ * Focus visibility — every interactive shell element exposes a visible ring.
+ * Focus rings are never removed; hover styling is additive.
+ * ========================================================================== */
+.gl-nav-item:focus-visible,
+.gl-icon-btn:focus-visible,
+.gl-sidebar a:focus-visible,
+.gl-topbar button:focus-visible {
+  outline: none;
+  box-shadow: var(--focus-ring);
+  border-radius: var(--space-2);
+}
+
+/* =============================================================================
+ * Reduced motion — disable the sidebar width transition and other non-essential
+ * shell transitions.
+ * ========================================================================== */
+@media (prefers-reduced-motion: reduce) {
+  .gl-sidebar,
+  .gl-nav-item,
+  .gl-icon-btn {
+    transition: none;
+  }
+}

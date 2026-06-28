@@ -1,0 +1,415 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Greylux — Settings</title>
+
+  <!-- Pre-paint state (blocking): apply persisted gl-theme + gl-sidebar before first paint -->
+  <script>
+    (function () {
+      try {
+        if (localStorage.getItem('gl-theme') === 'dark') {
+          document.documentElement.setAttribute('data-theme', 'dark');
+        }
+        if (localStorage.getItem('gl-sidebar') === 'collapsed') {
+          document.documentElement.setAttribute('data-sidebar', 'collapsed');
+        }
+      } catch (e) { /* best-effort: fall back to documented defaults */ }
+    })();
+  </script>
+
+  <!-- CDN CSS (pinned) — loaded before local CSS so local tokens override Bootstrap -->
+  <link
+    href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css"
+    rel="stylesheet"
+    integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH"
+    crossorigin="anonymous" />
+  <link
+    href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css"
+    rel="stylesheet" />
+
+  <!-- Google Fonts: DM Sans 400/500/700, JetBrains Mono 500/600 -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link
+    href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;700&family=JetBrains+Mono:wght@500;600&display=swap"
+    rel="stylesheet" />
+
+  <!-- Local CSS — load order contract: tokens → layout → components → theme -->
+  <link rel="stylesheet" href="css/tokens.css" />
+  <link rel="stylesheet" href="css/layout.css" />
+  <link rel="stylesheet" href="css/components.css" />
+  <link rel="stylesheet" href="css/theme.css" />
+</head>
+<body>
+  <div class="gl-shell">
+    <!-- Sidebar -->
+    <aside class="gl-sidebar">
+      <div class="gl-brand">
+        <span class="gl-brand-mark">GL</span>
+        <span class="gl-brand-label">greylux</span>
+      </div>
+
+      <nav class="gl-nav" aria-label="Primary">
+        <div class="gl-nav-group">
+          <p class="gl-nav-group-title">Main</p>
+          <a class="gl-nav-item" href="index.html">
+            <i class="bi bi-house-door gl-nav-icon" aria-hidden="true"></i>
+            <span class="gl-nav-label">Overview</span>
+          </a>
+          <a class="gl-nav-item" href="analytics.html">
+            <i class="bi bi-bar-chart-line gl-nav-icon" aria-hidden="true"></i>
+            <span class="gl-nav-label">Analytics</span>
+          </a>
+          <a class="gl-nav-item" href="users.html">
+            <i class="bi bi-people gl-nav-icon" aria-hidden="true"></i>
+            <span class="gl-nav-label">Users</span>
+          </a>
+        </div>
+
+        <div class="gl-nav-group">
+          <p class="gl-nav-group-title">Account</p>
+          <a class="gl-nav-item is-active" href="settings.html" aria-current="page">
+            <i class="bi bi-sliders gl-nav-icon" aria-hidden="true"></i>
+            <span class="gl-nav-label">Settings</span>
+          </a>
+          <a class="gl-nav-item" href="login.html">
+            <i class="bi bi-box-arrow-right gl-nav-icon" aria-hidden="true"></i>
+            <span class="gl-nav-label">Logout</span>
+          </a>
+        </div>
+      </nav>
+
+      <div class="gl-user">
+        <span class="gl-avatar" aria-hidden="true">MR</span>
+        <div class="gl-user-meta">
+          <span class="gl-user-name">Morgan Reyes</span>
+          <span class="gl-user-role">Administrator</span>
+        </div>
+      </div>
+    </aside>
+
+    <!-- Main column -->
+    <div class="gl-main">
+      <header class="gl-topbar">
+        <button type="button" class="gl-icon-btn gl-sidebar-toggle" id="gl-sidebar-toggle"
+          aria-label="Toggle sidebar">
+          <i class="bi bi-list" aria-hidden="true"></i>
+        </button>
+
+        <div class="gl-topbar-actions">
+          <button type="button" class="gl-icon-btn gl-theme-toggle" id="gl-theme-toggle"
+            data-theme-toggle aria-label="Toggle theme" aria-pressed="false">
+            <i class="bi bi-moon-fill" aria-hidden="true"></i>
+          </button>
+          <button type="button" class="gl-icon-btn gl-notif" aria-label="Notifications">
+            <i class="bi bi-bell" aria-hidden="true"></i>
+            <span class="gl-notif-dot" aria-hidden="true"></span>
+          </button>
+        </div>
+      </header>
+
+      <main class="gl-content">
+        <div class="gl-content-inner">
+          <div class="gl-page-head">
+            <h1 class="gl-page-title">Settings</h1>
+          </div>
+
+          <div class="gl-settings-stack">
+            <!-- 1) Profile (Req 9.1) ============================================ -->
+            <section class="gl-panel gl-panel--settings" aria-labelledby="gl-profile-heading">
+              <div class="gl-panel-header">
+                <h2 class="gl-panel-title" id="gl-profile-heading">Profile</h2>
+              </div>
+
+              <div class="gl-form-grid">
+                <div class="gl-form-group">
+                  <label class="gl-form-label" for="gl-profile-name">Full Name</label>
+                  <input class="form-control gl-form-control" type="text" id="gl-profile-name"
+                    name="fullName" autocomplete="name" value="Morgan Reyes" />
+                </div>
+                <div class="gl-form-group">
+                  <label class="gl-form-label" for="gl-profile-email">Email Address</label>
+                  <input class="form-control gl-form-control" type="email" id="gl-profile-email"
+                    name="email" autocomplete="email" value="m.reyes@greylux.example" />
+                </div>
+                <div class="gl-form-group">
+                  <label class="gl-form-label" for="gl-profile-role">Role</label>
+                  <!-- Read-only Role: --text-muted, readonly + aria-readonly (Req 9.1) -->
+                  <input class="form-control gl-form-control gl-form-control--readonly" type="text"
+                    id="gl-profile-role" value="Administrator" readonly aria-readonly="true"
+                    tabindex="-1" />
+                </div>
+              </div>
+
+              <div class="gl-form-actions">
+                <button type="button" class="btn gl-btn-primary" id="gl-profile-save">Save Changes</button>
+              </div>
+            </section>
+
+            <!-- 2) Security (Req 9.2) =========================================== -->
+            <section class="gl-panel gl-panel--settings" aria-labelledby="gl-security-heading">
+              <div class="gl-panel-header">
+                <h2 class="gl-panel-title" id="gl-security-heading">Security</h2>
+              </div>
+
+              <div class="gl-form-grid">
+                <div class="gl-form-group">
+                  <label class="gl-form-label" for="gl-current-password">Current Password</label>
+                  <input class="form-control gl-form-control" type="password" id="gl-current-password"
+                    autocomplete="current-password" />
+                </div>
+                <div class="gl-form-group">
+                  <label class="gl-form-label" for="gl-new-password">New Password</label>
+                  <input class="form-control gl-form-control" type="password" id="gl-new-password"
+                    autocomplete="new-password" />
+                </div>
+                <div class="gl-form-group">
+                  <label class="gl-form-label" for="gl-confirm-password">Confirm Password</label>
+                  <input class="form-control gl-form-control" type="password" id="gl-confirm-password"
+                    autocomplete="new-password" />
+                </div>
+              </div>
+
+              <!-- 2FA toggle → gl-2fa (default OFF; wired in task 10.2) -->
+              <div class="gl-setting-row">
+                <div class="gl-setting-copy">
+                  <label class="gl-setting-label" for="gl-2fa-toggle">Two-Factor Authentication</label>
+                  <p class="gl-setting-sub">Require a verification code on each login.</p>
+                </div>
+                <div class="form-check form-switch gl-switch">
+                  <input class="form-check-input" type="checkbox" role="switch" id="gl-2fa-toggle"
+                    aria-label="Two-Factor Authentication" />
+                </div>
+              </div>
+            </section>
+
+            <!-- 3) Preferences (Req 9.3) ======================================== -->
+            <section class="gl-panel gl-panel--settings" aria-labelledby="gl-prefs-heading">
+              <div class="gl-panel-header">
+                <h2 class="gl-panel-title" id="gl-prefs-heading">Preferences</h2>
+              </div>
+
+              <!-- Dark Mode → gl-theme (synced with theme.js in task 10.2) -->
+              <div class="gl-setting-row">
+                <div class="gl-setting-copy">
+                  <label class="gl-setting-label" for="gl-darkmode-toggle">Dark Mode</label>
+                  <p class="gl-setting-sub">Use the dark color scheme across the dashboard.</p>
+                </div>
+                <div class="form-check form-switch gl-switch">
+                  <input class="form-check-input" type="checkbox" role="switch" id="gl-darkmode-toggle"
+                    aria-label="Dark Mode" />
+                </div>
+              </div>
+
+              <!-- Sidebar default → gl-sidebar ('expanded' when on, 'collapsed' when off) -->
+              <div class="gl-setting-row">
+                <div class="gl-setting-copy">
+                  <label class="gl-setting-label" for="gl-sidebar-pref-toggle">Sidebar</label>
+                  <p class="gl-setting-sub">Start expanded by default, or collapsed to icons only.</p>
+                </div>
+                <div class="form-check form-switch gl-switch">
+                  <input class="form-check-input" type="checkbox" role="switch" id="gl-sidebar-pref-toggle"
+                    aria-label="Sidebar expanded by default" />
+                </div>
+              </div>
+
+              <!-- Date Format → gl-dateformat -->
+              <div class="gl-setting-row">
+                <div class="gl-setting-copy">
+                  <label class="gl-setting-label" for="gl-dateformat-select">Date Format</label>
+                  <p class="gl-setting-sub">How dates display across tables and charts.</p>
+                </div>
+                <select class="form-select gl-form-select" id="gl-dateformat-select"
+                  aria-label="Date format">
+                  <option value="DD/MM/YYYY">DD/MM/YYYY</option>
+                  <option value="MM/DD/YYYY">MM/DD/YYYY</option>
+                  <option value="YYYY-MM-DD">YYYY-MM-DD</option>
+                </select>
+              </div>
+            </section>
+
+            <!-- 4) Notifications — placeholder, non-functional (Req 9.4) ========= -->
+            <section class="gl-panel gl-panel--settings" aria-labelledby="gl-notif-heading">
+              <div class="gl-panel-header gl-notif-header">
+                <h2 class="gl-panel-title" id="gl-notif-heading">
+                  <i class="bi bi-envelope" aria-hidden="true"></i>
+                  Notifications
+                </h2>
+                <span class="gl-notif-note">(Email server not configured)</span>
+              </div>
+
+              <div class="gl-setting-row is-disabled">
+                <div class="gl-setting-copy">
+                  <label class="gl-setting-label" for="gl-notif-large-txn">Large Transaction Alerts</label>
+                  <p class="gl-setting-sub">Receive an email when a transaction exceeds $10,000.</p>
+                </div>
+                <div class="form-check form-switch gl-switch">
+                  <input class="form-check-input" type="checkbox" role="switch" id="gl-notif-large-txn"
+                    aria-label="Large Transaction Alerts" disabled />
+                </div>
+              </div>
+
+              <div class="gl-setting-row is-disabled">
+                <div class="gl-setting-copy">
+                  <label class="gl-setting-label" for="gl-notif-daily-summary">Daily Summary</label>
+                  <p class="gl-setting-sub">Receive a morning summary of account activity.</p>
+                </div>
+                <div class="form-check form-switch gl-switch">
+                  <input class="form-check-input" type="checkbox" role="switch" id="gl-notif-daily-summary"
+                    aria-label="Daily Summary" disabled />
+                </div>
+              </div>
+            </section>
+          </div>
+        </div>
+      </main>
+    </div>
+  </div>
+
+  <!-- CDN JS (pinned) before </body> -->
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"
+    integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz"
+    crossorigin="anonymous"></script>
+  <!-- Local JS modules (ES modules: utils/theme/sidebar use import/export) -->
+  <script type="module" src="js/utils.js"></script>
+  <script type="module" src="js/theme.js"></script>
+  <script type="module" src="js/sidebar.js"></script>
+
+  <!-- Settings page script (task 10.2): preference persistence + DOMContentLoaded init.
+       Reads all gl-* keys and initializes every toggle/select to persisted state, then
+       binds change handlers that persist (best-effort) and apply immediately (no reload).
+       Wiring points (do not remove — task 10.2 depends on these ids):
+         #gl-2fa-toggle          -> gl-2fa        ('on' | 'off'; default off)
+         #gl-darkmode-toggle     -> gl-theme      (sync with theme.js applyTheme/toggleTheme)
+         #gl-sidebar-pref-toggle -> gl-sidebar    (checked => 'expanded', unchecked => 'collapsed')
+         #gl-dateformat-select   -> gl-dateformat ('DD/MM/YYYY' | 'MM/DD/YYYY' | 'YYYY-MM-DD')
+         #gl-profile-name / #gl-profile-email / #gl-profile-save -> profile form state
+  -->
+  <script type="module">
+    // Task 10.2 — Settings preference persistence + initialization.
+    // theme.js is the single source of truth for gl-theme (keeps the Dark Mode
+    // toggle and the topbar Theme_Toggle in sync). sidebar.js owns gl-sidebar.
+    import { applyTheme, getStoredTheme, persistTheme } from './js/theme.js';
+    import { getStoredSidebar, persistSidebar } from './js/sidebar.js';
+
+    // localStorage keys owned by SettingsPage (design "localStorage Keys").
+    const KEY_2FA = 'gl-2fa';
+    const KEY_DATEFORMAT = 'gl-dateformat';
+
+    // Date Format: design's settings default for the control's initial value when
+    // unset. (utils.formatDate falls back to 'YYYY-MM-DD' for rendering, but the
+    // Settings control surfaces 'DD/MM/YYYY' as the default selection.)
+    const DEFAULT_DATEFORMAT = 'DD/MM/YYYY';
+    const VALID_DATEFORMATS = ['DD/MM/YYYY', 'MM/DD/YYYY', 'YYYY-MM-DD'];
+
+    // --- best-effort localStorage helpers (Req 2.4 / 9.5) --------------------
+    function readKey(key) {
+      try {
+        return localStorage.getItem(key);
+      } catch (e) {
+        return null; // storage unavailable — treat as unset
+      }
+    }
+    function writeKey(key, value) {
+      try {
+        localStorage.setItem(key, value);
+      } catch (e) {
+        // best-effort: swallow quota/security errors; in-session change still applies
+      }
+    }
+
+    /** Resolve the theme currently applied to the document (set pre-paint), with fallback. */
+    function currentTheme() {
+      const applied =
+        document.documentElement.getAttribute('data-theme') === 'dark' ? 'dark' : null;
+      return applied || getStoredTheme() || 'light';
+    }
+
+    function init() {
+      const darkToggle = document.getElementById('gl-darkmode-toggle');
+      const sidebarToggle = document.getElementById('gl-sidebar-pref-toggle');
+      const twoFaToggle = document.getElementById('gl-2fa-toggle');
+      const dateFormatSelect = document.getElementById('gl-dateformat-select');
+      const profileName = document.getElementById('gl-profile-name');
+      const profileEmail = document.getElementById('gl-profile-email');
+      const profileSave = document.getElementById('gl-profile-save');
+
+      // --- Initialization: reflect persisted state BEFORE user interaction ----
+
+      // Dark Mode: checked when the active theme is dark.
+      if (darkToggle) {
+        darkToggle.checked = currentTheme() === 'dark';
+      }
+
+      // Sidebar: expanded => checked, collapsed => unchecked. Missing => expanded.
+      if (sidebarToggle) {
+        sidebarToggle.checked = getStoredSidebar() !== 'collapsed';
+      }
+
+      // 2FA: checked only when explicitly stored 'on' (default off).
+      if (twoFaToggle) {
+        twoFaToggle.checked = readKey(KEY_2FA) === 'on';
+      }
+
+      // Date Format: stored value if valid, else the settings default.
+      if (dateFormatSelect) {
+        const storedFormat = readKey(KEY_DATEFORMAT);
+        dateFormatSelect.value = VALID_DATEFORMATS.includes(storedFormat)
+          ? storedFormat
+          : DEFAULT_DATEFORMAT;
+      }
+
+      // --- Change handlers: persist + apply immediately, no reload (Req 9.5) --
+
+      // Dark Mode → gl-theme. Route through theme.js so the topbar toggle stays
+      // in sync (applyTheme updates data-theme + the topbar toggle visual).
+      if (darkToggle) {
+        darkToggle.addEventListener('change', () => {
+          const next = darkToggle.checked ? 'dark' : 'light';
+          applyTheme(next);
+          persistTheme(next);
+        });
+      }
+
+      // Sidebar → gl-sidebar. Apply the data-sidebar attribute and persist.
+      if (sidebarToggle) {
+        sidebarToggle.addEventListener('change', () => {
+          const state = sidebarToggle.checked ? 'expanded' : 'collapsed';
+          document.documentElement.setAttribute('data-sidebar', state);
+          persistSidebar(state);
+        });
+      }
+
+      // 2FA → gl-2fa ('on' | 'off'). Best-effort persist; no server call.
+      if (twoFaToggle) {
+        twoFaToggle.addEventListener('change', () => {
+          writeKey(KEY_2FA, twoFaToggle.checked ? 'on' : 'off');
+        });
+      }
+
+      // Date Format → gl-dateformat. Persisted; columns re-read on next page load.
+      if (dateFormatSelect) {
+        dateFormatSelect.addEventListener('change', () => {
+          writeKey(KEY_DATEFORMAT, dateFormatSelect.value);
+        });
+      }
+
+      // Profile Save → persist name + email (minimal, best-effort).
+      if (profileSave) {
+        profileSave.addEventListener('click', () => {
+          if (profileName) writeKey('gl-profile-name', profileName.value.trim());
+          if (profileEmail) writeKey('gl-profile-email', profileEmail.value.trim());
+        });
+      }
+    }
+
+    if (document.readyState === 'loading') {
+      document.addEventListener('DOMContentLoaded', init);
+    } else {
+      init();
+    }
+  </script>
+</body>
+</html>

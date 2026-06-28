@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Greylux — Sign In</title>
+
+  <!-- Auth page: no shell, no pre-paint script, no ApexCharts, no shell JS modules -->
+
+  <!-- CDN CSS (pinned) — loaded before local CSS so local tokens override Bootstrap -->
+  <link
+    href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css"
+    rel="stylesheet"
+    integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH"
+    crossorigin="anonymous" />
+  <link
+    href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css"
+    rel="stylesheet" />
+
+  <!-- Google Fonts: DM Sans 400/500/700, JetBrains Mono 500/600 -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link
+    href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;700&family=JetBrains+Mono:wght@500;600&display=swap"
+    rel="stylesheet" />
+
+  <!-- Local CSS — load order contract: tokens → layout → components → theme -->
+  <link rel="stylesheet" href="css/tokens.css" />
+  <link rel="stylesheet" href="css/layout.css" />
+  <link rel="stylesheet" href="css/components.css" />
+  <link rel="stylesheet" href="css/theme.css" />
+</head>
+<body>
+  <div class="gl-auth-wrap">
+    <main class="gl-auth-card">
+      <div class="gl-auth-brand">
+        <span class="gl-auth-monogram" aria-hidden="true">GL</span>
+        <span class="gl-auth-wordmark">greylux</span>
+        <h1 class="gl-auth-heading">Sign in to your account</h1>
+      </div>
+
+      <form class="gl-auth-form" id="loginForm" novalidate>
+        <div class="gl-field">
+          <label class="gl-label" for="loginEmail">Email address</label>
+          <input
+            class="gl-input"
+            type="email"
+            id="loginEmail"
+            name="email"
+            autocomplete="email"
+            placeholder="you@greylux.com"
+            required />
+        </div>
+
+        <div class="gl-field">
+          <label class="gl-label" for="loginPassword">Password</label>
+          <input
+            class="gl-input"
+            type="password"
+            id="loginPassword"
+            name="password"
+            autocomplete="current-password"
+            placeholder="••••••••"
+            required />
+        </div>
+
+        <div class="gl-checkbox-row">
+          <input class="gl-checkbox" type="checkbox" id="rememberMe" name="remember" />
+          <label class="gl-checkbox-label" for="rememberMe">Remember me</label>
+        </div>
+
+        <button class="gl-btn-primary gl-btn-primary--block" type="submit">SIGN IN</button>
+      </form>
+
+      <div class="gl-auth-links">
+        <a class="gl-auth-link" href="forgot-password.html">Forgot your password?</a>
+      </div>
+    </main>
+  </div>
+
+  <!-- Minimal inline auth script (Req 10.8): presentational only, no shared modules.
+       Prevents real submission and routes to the dashboard. -->
+  <script>
+    document.getElementById('loginForm').addEventListener('submit', function (e) {
+      e.preventDefault();
+      window.location.href = 'index.html';
+    });
+  </script>
+
+  <!-- CDN JS (pinned) before </body>. Auth pages exclude utils.js/theme.js/sidebar.js/charts.js -->
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"
+    integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz"
+    crossorigin="anonymous"></script>
+</body>
+</html>

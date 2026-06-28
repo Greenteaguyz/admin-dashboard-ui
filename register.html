@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<!-- INVITE-ONLY: this page is intentionally unlinked from all navigation. -->
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Greylux — Create Account</title>
+
+  <!-- Auth page: no shell, no pre-paint script, no ApexCharts, no shell JS modules -->
+
+  <!-- CDN CSS (pinned) — loaded before local CSS so local tokens override Bootstrap -->
+  <link
+    href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css"
+    rel="stylesheet"
+    integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH"
+    crossorigin="anonymous" />
+  <link
+    href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css"
+    rel="stylesheet" />
+
+  <!-- Google Fonts: DM Sans 400/500/700, JetBrains Mono 500/600 -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link
+    href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;700&family=JetBrains+Mono:wght@500;600&display=swap"
+    rel="stylesheet" />
+
+  <!-- Local CSS — load order contract: tokens → layout → components → theme -->
+  <link rel="stylesheet" href="css/tokens.css" />
+  <link rel="stylesheet" href="css/layout.css" />
+  <link rel="stylesheet" href="css/components.css" />
+  <link rel="stylesheet" href="css/theme.css" />
+</head>
+<body>
+  <!-- INVITE-ONLY: account creation is by invitation. This page is intentionally
+       NOT linked from any navigation, login, or other page. -->
+  <div class="gl-auth-wrap">
+    <main class="gl-auth-card">
+      <div class="gl-auth-brand">
+        <span class="gl-auth-monogram" aria-hidden="true">GL</span>
+        <span class="gl-auth-wordmark">greylux</span>
+        <h1 class="gl-auth-heading">Create your account</h1>
+        <p class="gl-auth-subtext">Invitation required.</p>
+      </div>
+
+      <form class="gl-auth-form" id="registerForm" novalidate>
+        <div class="gl-field">
+          <label class="gl-label" for="regName">Full name</label>
+          <input
+            class="gl-input"
+            type="text"
+            id="regName"
+            name="name"
+            autocomplete="name"
+            placeholder="Jane Okafor"
+            required />
+        </div>
+
+        <div class="gl-field">
+          <label class="gl-label" for="regEmail">Email address</label>
+          <input
+            class="gl-input"
+            type="email"
+            id="regEmail"
+            name="email"
+            autocomplete="email"
+            placeholder="you@greylux.com"
+            required />
+        </div>
+
+        <div class="gl-field">
+          <label class="gl-label" for="regPassword">Password</label>
+          <input
+            class="gl-input"
+            type="password"
+            id="regPassword"
+            name="password"
+            autocomplete="new-password"
+            placeholder="••••••••"
+            required />
+        </div>
+
+        <div class="gl-field">
+          <label class="gl-label" for="regConfirm">Confirm password</label>
+          <input
+            class="gl-input"
+            type="password"
+            id="regConfirm"
+            name="confirm"
+            autocomplete="new-password"
+            placeholder="••••••••"
+            required />
+        </div>
+
+        <button class="gl-btn-primary gl-btn-primary--block" type="submit">CREATE ACCOUNT</button>
+      </form>
+    </main>
+  </div>
+
+  <!-- Minimal inline auth script: presentational only, no shared modules. -->
+  <script>
+    document.getElementById('registerForm').addEventListener('submit', function (e) {
+      e.preventDefault();
+      window.location.href = 'index.html';
+    });
+  </script>
+
+  <!-- CDN JS (pinned) before </body>. Auth pages exclude utils.js/theme.js/sidebar.js/charts.js -->
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"
+    integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz"
+    crossorigin="anonymous"></script>
+</body>
+</html>

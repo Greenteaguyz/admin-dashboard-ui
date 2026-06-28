@@ -1,0 +1,505 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Greylux — Users</title>
+
+  <!-- Pre-paint state (blocking): apply persisted gl-theme + gl-sidebar before first paint -->
+  <script>
+    (function () {
+      try {
+        if (localStorage.getItem('gl-theme') === 'dark') {
+          document.documentElement.setAttribute('data-theme', 'dark');
+        }
+        if (localStorage.getItem('gl-sidebar') === 'collapsed') {
+          document.documentElement.setAttribute('data-sidebar', 'collapsed');
+        }
+      } catch (e) { /* best-effort: fall back to documented defaults */ }
+    })();
+  </script>
+
+  <!-- CDN CSS (pinned) — loaded before local CSS so local tokens override Bootstrap -->
+  <link
+    href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css"
+    rel="stylesheet"
+    integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH"
+    crossorigin="anonymous" />
+  <link
+    href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css"
+    rel="stylesheet" />
+
+  <!-- Google Fonts: DM Sans 400/500/700, JetBrains Mono 500/600 -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link
+    href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;700&family=JetBrains+Mono:wght@500;600&display=swap"
+    rel="stylesheet" />
+
+  <!-- Local CSS — load order contract: tokens → layout → components → theme -->
+  <link rel="stylesheet" href="css/tokens.css" />
+  <link rel="stylesheet" href="css/layout.css" />
+  <link rel="stylesheet" href="css/components.css" />
+  <link rel="stylesheet" href="css/theme.css" />
+</head>
+<body>
+  <div class="gl-shell">
+    <!-- Sidebar -->
+    <aside class="gl-sidebar">
+      <div class="gl-brand">
+        <span class="gl-brand-mark">GL</span>
+        <span class="gl-brand-label">greylux</span>
+      </div>
+
+      <nav class="gl-nav" aria-label="Primary">
+        <div class="gl-nav-group">
+          <p class="gl-nav-group-title">Main</p>
+          <a class="gl-nav-item" href="index.html">
+            <i class="bi bi-house-door gl-nav-icon" aria-hidden="true"></i>
+            <span class="gl-nav-label">Overview</span>
+          </a>
+          <a class="gl-nav-item" href="analytics.html">
+            <i class="bi bi-bar-chart-line gl-nav-icon" aria-hidden="true"></i>
+            <span class="gl-nav-label">Analytics</span>
+          </a>
+          <a class="gl-nav-item is-active" href="users.html" aria-current="page">
+            <i class="bi bi-people gl-nav-icon" aria-hidden="true"></i>
+            <span class="gl-nav-label">Users</span>
+          </a>
+        </div>
+
+        <div class="gl-nav-group">
+          <p class="gl-nav-group-title">Account</p>
+          <a class="gl-nav-item" href="settings.html">
+            <i class="bi bi-sliders gl-nav-icon" aria-hidden="true"></i>
+            <span class="gl-nav-label">Settings</span>
+          </a>
+          <a class="gl-nav-item" href="login.html">
+            <i class="bi bi-box-arrow-right gl-nav-icon" aria-hidden="true"></i>
+            <span class="gl-nav-label">Logout</span>
+          </a>
+        </div>
+      </nav>
+
+      <div class="gl-user">
+        <span class="gl-avatar" aria-hidden="true">MR</span>
+        <div class="gl-user-meta">
+          <span class="gl-user-name">Morgan Reyes</span>
+          <span class="gl-user-role">Administrator</span>
+        </div>
+      </div>
+    </aside>
+
+    <!-- Main column -->
+    <div class="gl-main">
+      <header class="gl-topbar">
+        <button type="button" class="gl-icon-btn gl-sidebar-toggle" id="gl-sidebar-toggle"
+          aria-label="Toggle sidebar">
+          <i class="bi bi-list" aria-hidden="true"></i>
+        </button>
+
+        <div class="gl-topbar-actions">
+          <button type="button" class="gl-icon-btn gl-theme-toggle" id="gl-theme-toggle"
+            data-theme-toggle aria-label="Toggle theme" aria-pressed="false">
+            <i class="bi bi-moon-fill" aria-hidden="true"></i>
+          </button>
+          <button type="button" class="gl-icon-btn gl-notif" aria-label="Notifications">
+            <i class="bi bi-bell" aria-hidden="true"></i>
+            <span class="gl-notif-dot" aria-hidden="true"></span>
+          </button>
+        </div>
+      </header>
+
+      <main class="gl-content">
+        <div class="gl-content-inner">
+          <h1 class="gl-page-title">Members</h1>
+
+          <!-- Tab control (Req 8.1, 8.2, 8.3). aria-selected drives the active visual;
+               each button controls its matching tabpanel. -->
+          <div class="gl-tabs" role="tablist" aria-label="Users views">
+            <button type="button" role="tab" id="gl-tab-members" class="gl-tab"
+              aria-selected="true" aria-controls="gl-panel-members" data-tab="members">
+              <i class="bi bi-people" aria-hidden="true"></i>
+              <span>Members</span>
+            </button>
+            <button type="button" role="tab" id="gl-tab-transactions" class="gl-tab"
+              aria-selected="false" aria-controls="gl-panel-transactions" data-tab="transactions"
+              tabindex="-1">
+              <i class="bi bi-arrow-left-right" aria-hidden="true"></i>
+              <span>Transactions</span>
+            </button>
+          </div>
+
+          <!-- Members tabpanel (default) ----------------------------------- -->
+          <section id="gl-panel-members" class="gl-tabpanel" role="tabpanel"
+            aria-labelledby="gl-tab-members" data-tab="members">
+            <div class="gl-filter-bar">
+              <div class="gl-filter-search">
+                <i class="bi bi-search" aria-hidden="true"></i>
+                <input type="search" id="gl-members-search" class="gl-filter-input"
+                  placeholder="Search by name or account ID&hellip;" aria-label="Search members" />
+              </div>
+              <select id="gl-members-status" class="gl-filter-select" aria-label="Filter by status">
+                <option value="All">All Statuses</option>
+                <option value="Active">Active</option>
+                <option value="Suspended">Suspended</option>
+                <option value="Pending">Pending</option>
+              </select>
+              <select id="gl-members-type" class="gl-filter-select" aria-label="Filter by type">
+                <option value="All">All Types</option>
+                <option value="Checking">Checking</option>
+                <option value="Savings">Savings</option>
+                <option value="Business">Business</option>
+              </select>
+            </div>
+
+            <div class="gl-panel">
+              <div id="gl-members-table"></div>
+              <div id="gl-members-pagination"></div>
+            </div>
+          </section>
+
+          <!-- Transactions tabpanel ---------------------------------------- -->
+          <section id="gl-panel-transactions" class="gl-tabpanel" role="tabpanel"
+            aria-labelledby="gl-tab-transactions" data-tab="transactions" hidden>
+            <div class="gl-filter-bar">
+              <div class="gl-filter-search">
+                <i class="bi bi-search" aria-hidden="true"></i>
+                <input type="search" id="gl-txn-search" class="gl-filter-input"
+                  placeholder="Search by TXN ID or account&hellip;" aria-label="Search transactions" />
+              </div>
+              <select id="gl-txn-status" class="gl-filter-select" aria-label="Filter by status">
+                <option value="All">All Statuses</option>
+                <option value="Completed">Completed</option>
+                <option value="Pending">Pending</option>
+                <option value="Failed">Failed</option>
+              </select>
+              <select id="gl-txn-type" class="gl-filter-select" aria-label="Filter by type">
+                <option value="All">All Types</option>
+                <option value="Deposit">Deposit</option>
+                <option value="Withdrawal">Withdrawal</option>
+                <option value="Transfer">Transfer</option>
+              </select>
+            </div>
+
+            <div class="gl-panel">
+              <div id="gl-txn-table"></div>
+              <div id="gl-txn-pagination"></div>
+            </div>
+          </section>
+        </div>
+      </main>
+    </div>
+  </div>
+
+  <!-- CDN JS (pinned) before </body> -->
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"
+    integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz"
+    crossorigin="anonymous"></script>
+  <!-- Local JS modules (ES modules: self-wire shell interactions / expose globals) -->
+  <script type="module" src="js/theme.js"></script>
+  <script type="module" src="js/sidebar.js"></script>
+
+  <!-- Page module — Users tabs, mock data, filters, pagination, hash routing (task 9.2). -->
+  <script type="module">
+    import { renderStatusBadge } from './js/render.js';
+    import { formatCurrency, formatDate, renderWithSkeleton } from './js/utils.js';
+    import { applyFilters, paginate, resolveTab } from './js/users-logic.js';
+
+    // -- Mock data (API-ready) ----------------------------------------------
+    // Account shape: { accountId 'GL-XXXXXXXX', holder, type, balance, status, opened, lastTxn }.
+    // Status mix ~60% Active / ~25% Pending / ~15% Suspended (14 / 6 / 4 of 24).
+    // Replace with fetch('/api/accounts') when API is ready
+    const MOCK_ACCOUNTS = [
+      { accountId: 'GL-48820017', holder: 'Jane Okafor',        type: 'Checking', balance: 84200.00,   status: 'Active',    opened: '2022-03-15', lastTxn: '2024-06-12' },
+      { accountId: 'GL-48820024', holder: 'Marcus Delacroix',   type: 'Savings',  balance: 152340.55,  status: 'Active',    opened: '2021-11-02', lastTxn: '2024-06-11' },
+      { accountId: 'GL-48820039', holder: 'Priya Raman',        type: 'Business', balance: 938210.00,  status: 'Active',    opened: '2020-07-28', lastTxn: '2024-06-12' },
+      { accountId: 'GL-48820046', holder: 'Tobias Lindqvist',   type: 'Checking', balance: 4120.18,    status: 'Pending',   opened: '2024-05-30', lastTxn: '2024-06-09' },
+      { accountId: 'GL-48820053', holder: 'Amara Nwosu',        type: 'Savings',  balance: 61875.40,   status: 'Active',    opened: '2023-01-19', lastTxn: '2024-06-10' },
+      { accountId: 'GL-48820068', holder: 'Liang Wei',          type: 'Business', balance: 1240500.75, status: 'Active',    opened: '2019-09-11', lastTxn: '2024-06-12' },
+      { accountId: 'GL-48820071', holder: 'Sofia Castellanos',  type: 'Checking', balance: 23980.00,   status: 'Suspended', opened: '2022-08-04', lastTxn: '2024-04-22' },
+      { accountId: 'GL-48820086', holder: 'Henry Abara',        type: 'Savings',  balance: 9420.99,    status: 'Active',    opened: '2023-06-17', lastTxn: '2024-06-08' },
+      { accountId: 'GL-48820093', holder: 'Noor Al-Farsi',      type: 'Business', balance: 512000.00,  status: 'Pending',   opened: '2024-06-01', lastTxn: '2024-06-07' },
+      { accountId: 'GL-48820105', holder: 'Diego Marquez',      type: 'Checking', balance: 33150.25,   status: 'Active',    opened: '2021-04-23', lastTxn: '2024-06-11' },
+      { accountId: 'GL-48820112', holder: 'Eleanor Whitfield',  type: 'Savings',  balance: 287640.10,  status: 'Active',    opened: '2018-12-05', lastTxn: '2024-06-12' },
+      { accountId: 'GL-48820129', holder: 'Kwame Mensah',       type: 'Business', balance: 76500.00,   status: 'Suspended', opened: '2022-02-14', lastTxn: '2024-03-30' },
+      { accountId: 'GL-48820136', holder: 'Yuki Tanaka',        type: 'Checking', balance: 18420.60,   status: 'Active',    opened: '2023-09-08', lastTxn: '2024-06-10' },
+      { accountId: 'GL-48820143', holder: 'Isabella Rossi',     type: 'Savings',  balance: 44210.00,   status: 'Pending',   opened: '2024-05-21', lastTxn: '2024-06-06' },
+      { accountId: 'GL-48820158', holder: 'Omar Haddad',        type: 'Business', balance: 689300.45,  status: 'Active',    opened: '2020-10-30', lastTxn: '2024-06-12' },
+      { accountId: 'GL-48820165', holder: 'Grace Adeyemi',      type: 'Checking', balance: 12750.00,   status: 'Active',    opened: '2023-03-12', lastTxn: '2024-06-09' },
+      { accountId: 'GL-48820172', holder: 'Lars Petersen',      type: 'Savings',  balance: 95880.30,   status: 'Suspended', opened: '2021-07-19', lastTxn: '2024-02-18' },
+      { accountId: 'GL-48820189', holder: 'Mei Chen',           type: 'Business', balance: 1502300.00, status: 'Active',    opened: '2017-05-26', lastTxn: '2024-06-11' },
+      { accountId: 'GL-48820196', holder: 'Rafael Santos',      type: 'Checking', balance: 6320.75,    status: 'Pending',   opened: '2024-06-03', lastTxn: '2024-06-05' },
+      { accountId: 'GL-48820208', holder: 'Aaliyah Johnson',    type: 'Savings',  balance: 73410.20,   status: 'Active',    opened: '2022-12-01', lastTxn: '2024-06-12' },
+      { accountId: 'GL-48820215', holder: 'Viktor Novak',       type: 'Business', balance: 421900.00,  status: 'Active',    opened: '2019-02-08', lastTxn: '2024-06-10' },
+      { accountId: 'GL-48820222', holder: 'Chiara Bianchi',     type: 'Checking', balance: 28640.50,   status: 'Pending',   opened: '2024-04-27', lastTxn: '2024-06-04' },
+      { accountId: 'GL-48820237', holder: 'Daniel Osei',        type: 'Savings',  balance: 117200.00,  status: 'Active',    opened: '2020-08-15', lastTxn: '2024-06-11' },
+      { accountId: 'GL-48820244', holder: 'Fatima Zahra',       type: 'Business', balance: 845600.90,  status: 'Suspended', opened: '2021-01-22', lastTxn: '2024-05-02' }
+    ];
+
+    // Transaction shape: { txnId 'TXN-XXXXXXXX', account 'GL-XXXXXXXX', type, amount, status, timestamp }.
+    // Status mix ~70% Completed / ~20% Pending / ~10% Failed (17 / 5 / 2 of 24).
+    // Replace with fetch('/api/transactions') when API is ready
+    const MOCK_TRANSACTIONS = [
+      { txnId: 'TXN-90014482', account: 'GL-48820017', type: 'Deposit',    amount: 12500.00,  status: 'Completed', timestamp: '2024-06-12T14:32:00Z' },
+      { txnId: 'TXN-90014479', account: 'GL-48820024', type: 'Withdrawal', amount: 3200.00,   status: 'Pending',   timestamp: '2024-06-12T13:58:00Z' },
+      { txnId: 'TXN-90014471', account: 'GL-48820039', type: 'Transfer',   amount: 18750.50,  status: 'Completed', timestamp: '2024-06-12T12:11:00Z' },
+      { txnId: 'TXN-90014468', account: 'GL-48820053', type: 'Deposit',    amount: 640.00,    status: 'Completed', timestamp: '2024-06-12T10:47:00Z' },
+      { txnId: 'TXN-90014455', account: 'GL-48820017', type: 'Withdrawal', amount: 5000.00,   status: 'Failed',    timestamp: '2024-06-12T09:25:00Z' },
+      { txnId: 'TXN-90014447', account: 'GL-48820068', type: 'Transfer',   amount: 27300.00,  status: 'Completed', timestamp: '2024-06-11T18:03:00Z' },
+      { txnId: 'TXN-90014439', account: 'GL-48820093', type: 'Deposit',    amount: 9999.99,   status: 'Pending',   timestamp: '2024-06-11T16:40:00Z' },
+      { txnId: 'TXN-90014426', account: 'GL-48820105', type: 'Withdrawal', amount: 1450.25,   status: 'Completed', timestamp: '2024-06-11T15:12:00Z' },
+      { txnId: 'TXN-90014418', account: 'GL-48820112', type: 'Deposit',    amount: 84200.00,  status: 'Completed', timestamp: '2024-06-11T11:55:00Z' },
+      { txnId: 'TXN-90014405', account: 'GL-48820039', type: 'Transfer',   amount: 320.75,    status: 'Failed',    timestamp: '2024-06-10T22:18:00Z' },
+      { txnId: 'TXN-90014392', account: 'GL-48820136', type: 'Deposit',    amount: 6100.00,   status: 'Completed', timestamp: '2024-06-10T19:44:00Z' },
+      { txnId: 'TXN-90014384', account: 'GL-48820158', type: 'Withdrawal', amount: 2750.00,   status: 'Pending',   timestamp: '2024-06-10T08:30:00Z' },
+      { txnId: 'TXN-90014376', account: 'GL-48820189', type: 'Transfer',   amount: 64200.00,  status: 'Completed', timestamp: '2024-06-09T20:14:00Z' },
+      { txnId: 'TXN-90014363', account: 'GL-48820208', type: 'Deposit',    amount: 4310.40,   status: 'Completed', timestamp: '2024-06-09T17:02:00Z' },
+      { txnId: 'TXN-90014355', account: 'GL-48820165', type: 'Withdrawal', amount: 980.00,    status: 'Completed', timestamp: '2024-06-09T12:48:00Z' },
+      { txnId: 'TXN-90014347', account: 'GL-48820215', type: 'Transfer',   amount: 33500.00,  status: 'Pending',   timestamp: '2024-06-08T22:31:00Z' },
+      { txnId: 'TXN-90014334', account: 'GL-48820237', type: 'Deposit',    amount: 15750.00,  status: 'Completed', timestamp: '2024-06-08T16:19:00Z' },
+      { txnId: 'TXN-90014326', account: 'GL-48820068', type: 'Withdrawal', amount: 8200.50,   status: 'Completed', timestamp: '2024-06-08T11:05:00Z' },
+      { txnId: 'TXN-90014318', account: 'GL-48820112', type: 'Deposit',    amount: 22100.00,  status: 'Completed', timestamp: '2024-06-07T19:53:00Z' },
+      { txnId: 'TXN-90014305', account: 'GL-48820196', type: 'Transfer',   amount: 1290.25,   status: 'Pending',   timestamp: '2024-06-07T14:27:00Z' },
+      { txnId: 'TXN-90014292', account: 'GL-48820244', type: 'Withdrawal', amount: 47600.00,  status: 'Completed', timestamp: '2024-06-07T09:41:00Z' },
+      { txnId: 'TXN-90014284', account: 'GL-48820039', type: 'Deposit',    amount: 305400.00, status: 'Completed', timestamp: '2024-06-06T21:08:00Z' },
+      { txnId: 'TXN-90014276', account: 'GL-48820143', type: 'Transfer',   amount: 760.00,    status: 'Completed', timestamp: '2024-06-06T15:36:00Z' },
+      { txnId: 'TXN-90014263', account: 'GL-48820222', type: 'Withdrawal', amount: 3420.80,   status: 'Completed', timestamp: '2024-06-06T10:12:00Z' }
+    ];
+
+    const PAGE_SIZE = 10;
+
+    // -- Per-tab UI state ----------------------------------------------------
+    const state = {
+      members:      { search: '', status: 'All', type: 'All', page: 1 },
+      transactions: { search: '', status: 'All', type: 'All', page: 1 }
+    };
+
+    // Minimal escaper for any data interpolated as table cell text.
+    function escapeHtml(value) {
+      return String(value).replace(/[&<>"']/g, (ch) => (
+        { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[ch]
+      ));
+    }
+
+    // Empty-state markup shown when no records match the active filters.
+    function emptyState(message) {
+      return (
+        '<div class="gl-empty-state">' +
+        '<i class="bi bi-inbox" aria-hidden="true"></i>' +
+        '<p class="gl-empty-state__title">NO RECORDS FOUND</p>' +
+        `<p class="gl-empty-state__hint">${escapeHtml(message)}</p>` +
+        '</div>'
+      );
+    }
+
+    // Pagination controls: Previous/Next + "Showing X–Y of Z {noun}".
+    function buildPagination({ start, end, total, totalPages }, page, noun) {
+      const label = total === 0
+        ? `Showing 0 of 0 ${noun}`
+        : `Showing ${start}\u2013${end} of ${total} ${noun}`;
+      const prevDisabled = page <= 1 ? ' disabled' : '';
+      const nextDisabled = page >= totalPages ? ' disabled' : '';
+      return (
+        '<div class="gl-pagination">' +
+        `<span class="gl-pagination__label">${label}</span>` +
+        '<div class="gl-pagination__controls">' +
+        `<button type="button" class="gl-pagination__btn" data-page-action="prev"${prevDisabled}>` +
+        '<i class="bi bi-chevron-left" aria-hidden="true"></i><span>Previous</span></button>' +
+        `<button type="button" class="gl-pagination__btn" data-page-action="next"${nextDisabled}>` +
+        '<span>Next</span><i class="bi bi-chevron-right" aria-hidden="true"></i></button>' +
+        '</div></div>'
+      );
+    }
+
+    // -- Members rendering ---------------------------------------------------
+    function buildMembersTable(rows) {
+      if (rows.length === 0) {
+        return emptyState('No accounts match the current filters.');
+      }
+      const body = rows.map((a) => (
+        '<tr>' +
+        `<td class="gl-table__mono">${escapeHtml(a.accountId)}</td>` +
+        `<td>${escapeHtml(a.holder)}</td>` +
+        `<td>${escapeHtml(a.type)}</td>` +
+        `<td class="gl-table__amount">${escapeHtml(formatCurrency(a.balance))}</td>` +
+        `<td>${renderStatusBadge(a.status)}</td>` +
+        `<td class="gl-table__time">${escapeHtml(formatDate(a.opened))}</td>` +
+        `<td class="gl-table__time">${escapeHtml(formatDate(a.lastTxn))}</td>` +
+        '<td class="gl-table__actions">' +
+        `<button type="button" class="gl-action-btn" aria-label="View account ${escapeHtml(a.accountId)}">` +
+        '<i class="bi bi-eye" aria-hidden="true"></i></button></td>' +
+        '</tr>'
+      )).join('');
+
+      return (
+        '<div class="table-responsive">' +
+        '<table class="table gl-table">' +
+        '<thead><tr>' +
+        '<th scope="col">Account ID</th>' +
+        '<th scope="col">Account Holder</th>' +
+        '<th scope="col">Type</th>' +
+        '<th scope="col" class="gl-table__amount">Balance</th>' +
+        '<th scope="col">Status</th>' +
+        '<th scope="col">Opened</th>' +
+        '<th scope="col">Last Txn</th>' +
+        '<th scope="col">Actions</th>' +
+        '</tr></thead>' +
+        `<tbody>${body}</tbody>` +
+        '</table></div>'
+      );
+    }
+
+    function renderMembers() {
+      const s = state.members;
+      const filtered = applyFilters(MOCK_ACCOUNTS, {
+        search: s.search, status: s.status, type: s.type,
+        searchFields: ['holder', 'accountId']
+      });
+      const result = paginate(filtered, s.page, PAGE_SIZE);
+      s.page = result.totalPages === 0 ? 1 : Math.min(s.page, result.totalPages);
+      document.getElementById('gl-members-table').innerHTML = buildMembersTable(result.pageItems);
+      document.getElementById('gl-members-pagination').innerHTML =
+        buildPagination(result, s.page, 'accounts');
+    }
+
+    // -- Transactions rendering ---------------------------------------------
+    function buildTxnTable(rows) {
+      if (rows.length === 0) {
+        return emptyState('No transactions match the current filters.');
+      }
+      const body = rows.map((t) => (
+        '<tr>' +
+        `<td class="gl-table__mono">${escapeHtml(t.txnId)}</td>` +
+        `<td class="gl-table__mono">${escapeHtml(t.account)}</td>` +
+        `<td>${escapeHtml(t.type)}</td>` +
+        `<td class="gl-table__amount">${escapeHtml(formatCurrency(t.amount))}</td>` +
+        `<td>${renderStatusBadge(t.status)}</td>` +
+        `<td class="gl-table__time">${escapeHtml(formatDate(t.timestamp))}</td>` +
+        '</tr>'
+      )).join('');
+
+      return (
+        '<div class="table-responsive">' +
+        '<table class="table gl-table">' +
+        '<thead><tr>' +
+        '<th scope="col">TXN ID</th>' +
+        '<th scope="col">Account</th>' +
+        '<th scope="col">Type</th>' +
+        '<th scope="col" class="gl-table__amount">Amount</th>' +
+        '<th scope="col">Status</th>' +
+        '<th scope="col">Timestamp</th>' +
+        '</tr></thead>' +
+        `<tbody>${body}</tbody>` +
+        '</table></div>'
+      );
+    }
+
+    function renderTransactions() {
+      const s = state.transactions;
+      const filtered = applyFilters(MOCK_TRANSACTIONS, {
+        search: s.search, status: s.status, type: s.type,
+        searchFields: ['txnId', 'account']
+      });
+      const result = paginate(filtered, s.page, PAGE_SIZE);
+      s.page = result.totalPages === 0 ? 1 : Math.min(s.page, result.totalPages);
+      document.getElementById('gl-txn-table').innerHTML = buildTxnTable(result.pageItems);
+      document.getElementById('gl-txn-pagination').innerHTML =
+        buildPagination(result, s.page, 'transactions');
+    }
+
+    // -- Tab activation + hash routing (Req 8.1–8.4) ------------------------
+    const tabs = {
+      members: {
+        btn: document.getElementById('gl-tab-members'),
+        panel: document.getElementById('gl-panel-members')
+      },
+      transactions: {
+        btn: document.getElementById('gl-tab-transactions'),
+        panel: document.getElementById('gl-panel-transactions')
+      }
+    };
+
+    function activateTab(name, updateHash = true) {
+      const tab = tabs[name] ? name : 'members';
+      Object.keys(tabs).forEach((key) => {
+        const isActive = key === tab;
+        tabs[key].btn.setAttribute('aria-selected', String(isActive));
+        tabs[key].btn.tabIndex = isActive ? 0 : -1;
+        tabs[key].panel.hidden = !isActive;
+      });
+      // Update the hash WITHOUT triggering a reload or a hashchange feedback loop.
+      if (updateHash) {
+        const target = `#${tab}`;
+        if (location.hash !== target) {
+          history.replaceState(null, '', target);
+        }
+      }
+    }
+
+    // -- Initial render via renderWithSkeleton (DataUtils loading contract) --
+    renderWithSkeleton(
+      document.getElementById('gl-members-table'),
+      () => MOCK_ACCOUNTS,
+      () => { renderMembers(); return document.getElementById('gl-members-table').innerHTML; }
+    );
+    renderWithSkeleton(
+      document.getElementById('gl-txn-table'),
+      () => MOCK_TRANSACTIONS,
+      () => { renderTransactions(); return document.getElementById('gl-txn-table').innerHTML; }
+    );
+
+    // -- Wire tab buttons ----------------------------------------------------
+    Object.keys(tabs).forEach((name) => {
+      tabs[name].btn.addEventListener('click', () => activateTab(name));
+    });
+    // Respond to external hash changes (e.g. arriving from index.html#transactions).
+    window.addEventListener('hashchange', () => activateTab(resolveTab(location.hash), false));
+
+    // -- Wire Members filters (reset to page 1 on any filter change) --------
+    const membersSearch = document.getElementById('gl-members-search');
+    const membersStatus = document.getElementById('gl-members-status');
+    const membersType = document.getElementById('gl-members-type');
+    membersSearch.addEventListener('input', () => {
+      state.members.search = membersSearch.value; state.members.page = 1; renderMembers();
+    });
+    membersStatus.addEventListener('change', () => {
+      state.members.status = membersStatus.value; state.members.page = 1; renderMembers();
+    });
+    membersType.addEventListener('change', () => {
+      state.members.type = membersType.value; state.members.page = 1; renderMembers();
+    });
+
+    // -- Wire Transactions filters ------------------------------------------
+    const txnSearch = document.getElementById('gl-txn-search');
+    const txnStatus = document.getElementById('gl-txn-status');
+    const txnType = document.getElementById('gl-txn-type');
+    txnSearch.addEventListener('input', () => {
+      state.transactions.search = txnSearch.value; state.transactions.page = 1; renderTransactions();
+    });
+    txnStatus.addEventListener('change', () => {
+      state.transactions.status = txnStatus.value; state.transactions.page = 1; renderTransactions();
+    });
+    txnType.addEventListener('change', () => {
+      state.transactions.type = txnType.value; state.transactions.page = 1; renderTransactions();
+    });
+
+    // -- Pagination (event delegation per panel) ----------------------------
+    document.getElementById('gl-members-pagination').addEventListener('click', (ev) => {
+      const btn = ev.target.closest('[data-page-action]');
+      if (!btn || btn.disabled) return;
+      state.members.page += btn.dataset.pageAction === 'next' ? 1 : -1;
+      renderMembers();
+    });
+    document.getElementById('gl-txn-pagination').addEventListener('click', (ev) => {
+      const btn = ev.target.closest('[data-page-action]');
+      if (!btn || btn.disabled) return;
+      state.transactions.page += btn.dataset.pageAction === 'next' ? 1 : -1;
+      renderTransactions();
+    });
+
+    // -- Resolve the active tab from the URL hash on load (Req 8.3, 8.4) ----
+    activateTab(resolveTab(location.hash));
+  </script>
+</body>
+</html>

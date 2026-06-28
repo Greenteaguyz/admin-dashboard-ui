@@ -1,0 +1,77 @@
+/* =============================================================================
+ * Greylux — Design Tokens (single source of truth)
+ * =============================================================================
+ * Cascade contract: tokens.css -> layout.css -> components.css -> theme.css
+ *
+ * This file is the ONLY place allowed to contain literal color values
+ * (hex / rgb / rgba / hsl / hsla). Every other stylesheet references these
+ * custom properties exclusively. Zero inline styles in HTML.
+ *
+ * Light theme lives on :root; dark overrides live on [data-theme="dark"].
+ * The sidebar is theme-independent (always dark) and uses its own
+ * --sidebar-* tokens, never --text (which flips with theme).
+ *
+ * var() chains are kept to a single level. The only token references are:
+ *   --border         -> var(--border-color)
+ *   --card-padding   -> var(--space-5)
+ *   --focus-ring     -> var(--bg-card), var(--accent)
+ *   --bg-action      -> var(--accent)
+ *   --text-on-action -> var(--bg-card)
+ * ========================================================================== */
+
+:root {
+  /* Accent */
+  --accent: #0891B2;            /* cyan, light theme */
+  /* Primary action (Req 9.1 buttons). The design references a distinct
+   * --bg-action; per the agreed decision we keep primary buttons accent-filled
+   * (on-brand, single source, consistent across auth + settings) and flip
+   * automatically per theme, so --bg-action aliases the accent and
+   * --text-on-action aliases the card surface used for the label. */
+  --bg-action: var(--accent);
+  --text-on-action: var(--bg-card);
+  /* Semantic (stable across themes) */
+  --success: #10B981;
+  --warning: #F59E0B;
+  --danger:  #EF4444;
+  /* Surfaces / text */
+  --bg-content: #F7F8FA;        /* page background */
+  --bg-card:    #FFFFFF;        /* card / surface */
+  --text:       #1C1C27;        /* primary text */
+  --text-muted: #6B7280;        /* secondary text (>=4.5:1 on --bg-card) */
+  --border-color: #E5E7EB;
+  --border: 1px solid var(--border-color);
+  /* Sidebar — theme-independent (always dark) */
+  --sidebar-bg:          #1C1C27;
+  --sidebar-text:        #E5E7EB;
+  --sidebar-text-muted:  #9CA3AF;
+  /* Spacing — 4px grid (matches Req 11.3) */
+  --space-1: 4px;  --space-2: 8px;  --space-3: 12px; --space-4: 16px;
+  --space-5: 24px; --space-6: 32px; --space-7: 48px;
+  --card-padding: var(--space-5);
+  /* Typography */
+  --font-ui: 'DM Sans', system-ui, sans-serif;
+  --font-mono: 'JetBrains Mono', monospace;
+  /* Elevation (Req 11.4) — borders + restrained shadows, no glow */
+  --elevation-0: none;
+  --elevation-1: 0 1px 2px rgba(16, 24, 40, 0.06);
+  --elevation-2: 0 4px 12px rgba(16, 24, 40, 0.10);
+  --elevation-3: 0 12px 32px rgba(16, 24, 40, 0.14);
+  /* Z-index scale */
+  --z-base: 0; --z-sticky: 10; --z-dropdown: 20; --z-overlay: 40;
+  --z-modal: 100; --z-toast: 1000;
+  /* Focus ring (accessibility) */
+  --focus-ring: 0 0 0 2px var(--bg-card), 0 0 0 4px var(--accent);
+}
+
+[data-theme="dark"] {
+  --accent: #22D3EE;            /* cyan, dark theme */
+  --bg-content: #0E0E14;
+  --bg-card:    #15151E;
+  --text:       #E5E7EB;
+  --text-muted: #9CA3AF;        /* secondary text (>=4.5:1 on --bg-card) */
+  --border-color: #2A2A38;
+  /* sidebar-* unchanged: sidebar stays dark in both themes */
+  /* --success/--warning/--danger remain usable in both themes */
+  /* dark-mode card elevation favors a hairline border over black shadow */
+  --elevation-1: 0 0 0 1px rgba(255, 255, 255, 0.06);
+}

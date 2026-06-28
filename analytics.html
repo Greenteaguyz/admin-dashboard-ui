@@ -1,0 +1,371 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Greylux — Analytics</title>
+
+  <!-- Pre-paint state (blocking): apply persisted gl-theme + gl-sidebar before first paint -->
+  <script>
+    (function () {
+      try {
+        if (localStorage.getItem('gl-theme') === 'dark') {
+          document.documentElement.setAttribute('data-theme', 'dark');
+        }
+        if (localStorage.getItem('gl-sidebar') === 'collapsed') {
+          document.documentElement.setAttribute('data-sidebar', 'collapsed');
+        }
+      } catch (e) { /* best-effort: fall back to documented defaults */ }
+    })();
+  </script>
+
+  <!-- CDN CSS (pinned) — loaded before local CSS so local tokens override Bootstrap -->
+  <link
+    href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css"
+    rel="stylesheet"
+    integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH"
+    crossorigin="anonymous" />
+  <link
+    href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css"
+    rel="stylesheet" />
+
+  <!-- Google Fonts: DM Sans 400/500/700, JetBrains Mono 500/600 -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link
+    href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;700&family=JetBrains+Mono:wght@500;600&display=swap"
+    rel="stylesheet" />
+
+  <!-- Local CSS — load order contract: tokens → layout → components → theme -->
+  <link rel="stylesheet" href="css/tokens.css" />
+  <link rel="stylesheet" href="css/layout.css" />
+  <link rel="stylesheet" href="css/components.css" />
+  <link rel="stylesheet" href="css/theme.css" />
+
+  <!-- ApexCharts (pinned) — chart page: loaded in <head> per convention -->
+  <script src="https://cdn.jsdelivr.net/npm/apexcharts@3.49.0/dist/apexcharts.min.js"></script>
+</head>
+<body>
+  <div class="gl-shell">
+    <!-- Sidebar -->
+    <aside class="gl-sidebar">
+      <div class="gl-brand">
+        <span class="gl-brand-mark">GL</span>
+        <span class="gl-brand-label">greylux</span>
+      </div>
+
+      <nav class="gl-nav" aria-label="Primary">
+        <div class="gl-nav-group">
+          <p class="gl-nav-group-title">Main</p>
+          <a class="gl-nav-item" href="index.html">
+            <i class="bi bi-house-door gl-nav-icon" aria-hidden="true"></i>
+            <span class="gl-nav-label">Overview</span>
+          </a>
+          <a class="gl-nav-item is-active" href="analytics.html" aria-current="page">
+            <i class="bi bi-bar-chart-line gl-nav-icon" aria-hidden="true"></i>
+            <span class="gl-nav-label">Analytics</span>
+          </a>
+          <a class="gl-nav-item" href="users.html">
+            <i class="bi bi-people gl-nav-icon" aria-hidden="true"></i>
+            <span class="gl-nav-label">Users</span>
+          </a>
+        </div>
+
+        <div class="gl-nav-group">
+          <p class="gl-nav-group-title">Account</p>
+          <a class="gl-nav-item" href="settings.html">
+            <i class="bi bi-sliders gl-nav-icon" aria-hidden="true"></i>
+            <span class="gl-nav-label">Settings</span>
+          </a>
+          <a class="gl-nav-item" href="login.html">
+            <i class="bi bi-box-arrow-right gl-nav-icon" aria-hidden="true"></i>
+            <span class="gl-nav-label">Logout</span>
+          </a>
+        </div>
+      </nav>
+
+      <div class="gl-user">
+        <span class="gl-avatar" aria-hidden="true">MR</span>
+        <div class="gl-user-meta">
+          <span class="gl-user-name">Morgan Reyes</span>
+          <span class="gl-user-role">Administrator</span>
+        </div>
+      </div>
+    </aside>
+
+    <!-- Main column -->
+    <div class="gl-main">
+      <header class="gl-topbar">
+        <button type="button" class="gl-icon-btn gl-sidebar-toggle" id="gl-sidebar-toggle"
+          aria-label="Toggle sidebar">
+          <i class="bi bi-list" aria-hidden="true"></i>
+        </button>
+
+        <div class="gl-topbar-actions">
+          <button type="button" class="gl-icon-btn gl-theme-toggle" id="gl-theme-toggle"
+            data-theme-toggle aria-label="Toggle theme" aria-pressed="false">
+            <i class="bi bi-moon-fill" aria-hidden="true"></i>
+          </button>
+          <button type="button" class="gl-icon-btn gl-notif" aria-label="Notifications">
+            <i class="bi bi-bell" aria-hidden="true"></i>
+            <span class="gl-notif-dot" aria-hidden="true"></span>
+          </button>
+        </div>
+      </header>
+
+      <main class="gl-content">
+        <div class="gl-content-inner">
+          <!-- Page head: title + Date_Range_Filter (Req 7.4, 7.5) -->
+          <div class="gl-page-head">
+            <h1 class="gl-page-title">Analytics</h1>
+            <div class="gl-range-filter" role="group" aria-label="Date range">
+              <button type="button" class="gl-range-btn" data-range="7d" aria-pressed="false">Last 7 Days</button>
+              <button type="button" class="gl-range-btn is-active" data-range="30d" aria-pressed="true">Last 30 Days</button>
+              <button type="button" class="gl-range-btn" data-range="90d" aria-pressed="false">Last 90 Days</button>
+              <button type="button" class="gl-range-btn" data-range="ytd" aria-pressed="false">YTD</button>
+            </div>
+          </div>
+
+          <!-- 1) Transaction Volume — area, full width (Req 7.1) -->
+          <section class="gl-chart-card">
+            <h2 class="gl-chart-title">Transaction Volume</h2>
+            <div id="gl-chart-volume"></div>
+          </section>
+
+          <!-- 2) Deposits vs. Withdrawals (col-lg-7) + 3) Account Distribution (col-lg-5) -->
+          <div class="row g-4 gl-chart-row">
+            <div class="col-lg-7">
+              <section class="gl-chart-card gl-chart-card--fill">
+                <h2 class="gl-chart-title">Deposits vs. Withdrawals</h2>
+                <div id="gl-chart-depwith"></div>
+              </section>
+            </div>
+            <div class="col-lg-5">
+              <section class="gl-chart-card gl-chart-card--fill">
+                <h2 class="gl-chart-title">Account Distribution</h2>
+                <div id="gl-chart-distro"></div>
+              </section>
+            </div>
+          </div>
+
+          <!-- 4) Average Daily Balance — line, full width (Req 7.1) -->
+          <section class="gl-chart-card">
+            <h2 class="gl-chart-title">Avg. Daily Balance</h2>
+            <div id="gl-chart-balance"></div>
+          </section>
+        </div>
+      </main>
+    </div>
+  </div>
+
+  <!-- CDN JS (pinned) before </body> -->
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"
+    integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz"
+    crossorigin="anonymous"></script>
+  <!-- Local JS modules (ES modules: utils/theme/sidebar/charts use import/export) -->
+  <script type="module" src="js/utils.js"></script>
+  <script type="module" src="js/theme.js"></script>
+  <script type="module" src="js/sidebar.js"></script>
+  <script type="module" src="js/charts.js"></script>
+
+  <!-- Analytics page script (task 7.2): four charts + Date_Range_Filter. -->
+  <script type="module">
+    import { CHART_DEFAULTS, registerChart, sliceRange } from './js/charts.js';
+    import { computeAccountDistribution } from './js/render.js';
+
+    // ===== Mock data (API-ready) =========================================
+    // 90 chronological days ending today, generated deterministically.
+    function isoDay(offsetDays) {
+      const d = new Date();
+      d.setHours(0, 0, 0, 0);
+      d.setDate(d.getDate() + offsetDays);
+      return d.toISOString().slice(0, 10);
+    }
+    function buildSeries(make) {
+      const out = [];
+      for (let i = 89; i >= 0; i -= 1) out.push(make(isoDay(-i), 89 - i));
+      return out;
+    }
+
+    // Replace with fetch('/api/analytics/volume?range=90d') when API is ready
+    const MOCK_VOLUME_SERIES = buildSeries((date, n) => ({
+      date,
+      value: Math.round(7200000 + Math.sin(n / 6) * 1600000 + n * 18000),
+    }));
+
+    // Replace with fetch('/api/analytics/deposits-withdrawals?range=90d') when API is ready
+    const MOCK_DEPWITH_SERIES = buildSeries((date, n) => ({
+      date,
+      deposits: Math.round(5200000 + Math.sin(n / 5) * 900000 + n * 12000),
+      withdrawals: Math.round(3100000 + Math.cos(n / 7) * 700000 + n * 6000),
+    }));
+
+    // Replace with fetch('/api/analytics/balance?range=90d') when API is ready
+    const MOCK_BALANCE_SERIES = buildSeries((date, n) => ({
+      date,
+      value: Math.round(34000000 + Math.sin(n / 9) * 2200000 + n * 26000),
+    }));
+
+    // Replace with fetch('/api/accounts') when API is ready
+    // Co-located sample for the (static) distribution donut — preserves
+    // file-level isolation; Analytics does not depend on users.html data.
+    const MOCK_ACCOUNTS = [
+      { accountId: 'ACC-4471', type: 'Checking' }, { accountId: 'ACC-4472', type: 'Checking' },
+      { accountId: 'ACC-4473', type: 'Checking' }, { accountId: 'ACC-4474', type: 'Checking' },
+      { accountId: 'ACC-4475', type: 'Checking' }, { accountId: 'ACC-4476', type: 'Checking' },
+      { accountId: 'ACC-4477', type: 'Checking' }, { accountId: 'ACC-4478', type: 'Checking' },
+      { accountId: 'ACC-4479', type: 'Checking' }, { accountId: 'ACC-4480', type: 'Checking' },
+      { accountId: 'ACC-4481', type: 'Savings' }, { accountId: 'ACC-4482', type: 'Savings' },
+      { accountId: 'ACC-4483', type: 'Savings' }, { accountId: 'ACC-4484', type: 'Savings' },
+      { accountId: 'ACC-4485', type: 'Savings' }, { accountId: 'ACC-4486', type: 'Savings' },
+      { accountId: 'ACC-4487', type: 'Business' }, { accountId: 'ACC-4488', type: 'Business' },
+      { accountId: 'ACC-4489', type: 'Business' },
+    ];
+
+    const ACCOUNT_DISTRIBUTION = computeAccountDistribution(MOCK_ACCOUNTS);
+
+    // ===== Token-resolved colors (ApexCharts options are JS, no var()) ====
+    const token = (name) =>
+      getComputedStyle(document.documentElement).getPropertyValue(name).trim();
+    function hexToRgba(hex, alpha) {
+      const h = hex.replace('#', '');
+      const full = h.length === 3 ? h.split('').map((c) => c + c).join('') : h;
+      const r = parseInt(full.slice(0, 2), 16);
+      const g = parseInt(full.slice(2, 4), 16);
+      const b = parseInt(full.slice(4, 6), 16);
+      return `rgba(${r}, ${g}, ${b}, ${alpha})`;
+    }
+    const currentTheme = () =>
+      document.documentElement.getAttribute('data-theme') === 'dark' ? 'dark' : 'light';
+
+    const accent = token('--accent');
+    const muted = token('--text-muted');
+    const borderColor = token('--border-color');
+    const textColor = token('--text');
+
+    // Merge CHART_DEFAULTS; resolve grid.borderColor from --border-color at runtime.
+    function withDefaults(chartOverrides) {
+      return {
+        ...CHART_DEFAULTS,
+        chart: { ...CHART_DEFAULTS.chart, ...chartOverrides },
+        grid: { ...CHART_DEFAULTS.grid, borderColor },
+        tooltip: { ...CHART_DEFAULTS.tooltip, theme: currentTheme() },
+      };
+    }
+
+    const DEFAULT_RANGE = '30d';
+    const axisLabelStyle = { colors: muted, fontFamily: "'DM Sans', sans-serif" };
+    const xLabels = { rotate: 0, hideOverlappingLabels: true, style: axisLabelStyle };
+    const compact = new Intl.NumberFormat('en-US', { notation: 'compact', maximumFractionDigits: 1 });
+    const yLabels = { style: axisLabelStyle, formatter: (v) => `$${compact.format(v)}` };
+
+    const byId = (id) => document.getElementById(id);
+
+    // ===== 1) Transaction Volume — area, full width, accent ~15% fill =====
+    const v0 = sliceRange(MOCK_VOLUME_SERIES, DEFAULT_RANGE);
+    const volumeChart = new ApexCharts(byId('gl-chart-volume'), {
+      ...withDefaults({ type: 'area', height: 300 }),
+      series: [{ name: 'Volume', data: v0.map((d) => d.value) }],
+      xaxis: { categories: v0.map((d) => d.date), labels: xLabels, tooltip: { enabled: false } },
+      yaxis: { labels: yLabels },
+      colors: [accent],
+      fill: { type: 'solid', opacity: 0.15 },
+      stroke: { curve: 'smooth', width: 2 },
+      dataLabels: { enabled: false },
+    });
+    volumeChart.render();
+    registerChart('volumeChart', volumeChart);
+
+    // ===== 2) Deposits vs. Withdrawals — grouped bar (col-lg-7) ============
+    const dw0 = sliceRange(MOCK_DEPWITH_SERIES, DEFAULT_RANGE);
+    const depwithChart = new ApexCharts(byId('gl-chart-depwith'), {
+      ...withDefaults({ type: 'bar', height: 300 }),
+      series: [
+        { name: 'Deposits', data: dw0.map((d) => d.deposits) },
+        { name: 'Withdrawals', data: dw0.map((d) => d.withdrawals) },
+      ],
+      xaxis: { categories: dw0.map((d) => d.date), labels: xLabels },
+      yaxis: { labels: yLabels },
+      colors: [accent, muted],
+      plotOptions: { bar: { columnWidth: '70%' } },
+      dataLabels: { enabled: false },
+      legend: { show: true, position: 'top', labels: { colors: muted }, markers: { width: 8, height: 8 } },
+    });
+    depwithChart.render();
+    registerChart('depwithChart', depwithChart);
+
+    // ===== 3) Account Distribution — donut (col-lg-5), monochrome+accent ===
+    // Static (not date-bound). Accent on first segment only; remaining segments
+    // are monochrome grays. Text labels only — legend markers suppressed.
+    const distroChart = new ApexCharts(byId('gl-chart-distro'), {
+      ...withDefaults({ type: 'donut', height: 300 }),
+      series: ACCOUNT_DISTRIBUTION.map((d) => d.value),
+      labels: ACCOUNT_DISTRIBUTION.map((d) => d.label),
+      colors: [accent, muted, borderColor],
+      stroke: { width: 0 },
+      legend: { show: true, position: 'bottom', labels: { colors: muted }, markers: { width: 0, height: 0 } },
+      dataLabels: { enabled: true, formatter: (val) => `${Math.round(val)}%` },
+    });
+    distroChart.render();
+    registerChart('distroChart', distroChart);
+
+    // ===== 4) Average Daily Balance — line (no fill), --text @ ~80% ========
+    const b0 = sliceRange(MOCK_BALANCE_SERIES, DEFAULT_RANGE);
+    const balanceChart = new ApexCharts(byId('gl-chart-balance'), {
+      ...withDefaults({ type: 'line', height: 300 }),
+      series: [{ name: 'Avg Balance', data: b0.map((d) => d.value) }],
+      xaxis: { categories: b0.map((d) => d.date), labels: xLabels },
+      yaxis: { labels: yLabels },
+      colors: [hexToRgba(textColor, 0.8)],
+      stroke: { curve: 'smooth', width: 2 },
+      fill: { type: 'solid', opacity: 0 },
+      dataLabels: { enabled: false },
+    });
+    balanceChart.render();
+    registerChart('balanceChart', balanceChart);
+
+    // ===== Date_Range_Filter wiring (Req 7.6): re-slice, no reload =========
+    function applyRange(range) {
+      const v = sliceRange(MOCK_VOLUME_SERIES, range);
+      const dw = sliceRange(MOCK_DEPWITH_SERIES, range);
+      const b = sliceRange(MOCK_BALANCE_SERIES, range);
+      volumeChart.updateOptions(
+        { series: [{ name: 'Volume', data: v.map((d) => d.value) }], xaxis: { categories: v.map((d) => d.date) } },
+        false,
+        false
+      );
+      depwithChart.updateOptions(
+        {
+          series: [
+            { name: 'Deposits', data: dw.map((d) => d.deposits) },
+            { name: 'Withdrawals', data: dw.map((d) => d.withdrawals) },
+          ],
+          xaxis: { categories: dw.map((d) => d.date) },
+        },
+        false,
+        false
+      );
+      balanceChart.updateOptions(
+        { series: [{ name: 'Avg Balance', data: b.map((d) => d.value) }], xaxis: { categories: b.map((d) => d.date) } },
+        false,
+        false
+      );
+      // The Account Distribution donut is static (not date-bound).
+    }
+
+    const filterEl = document.querySelector('.gl-range-filter');
+    if (filterEl) {
+      filterEl.addEventListener('click', (ev) => {
+        const btn = ev.target.closest('.gl-range-btn');
+        if (!btn) return;
+        filterEl.querySelectorAll('.gl-range-btn').forEach((b) => {
+          const active = b === btn;
+          b.classList.toggle('is-active', active);
+          b.setAttribute('aria-pressed', String(active));
+        });
+        applyRange(btn.dataset.range);
+      });
+    }
+  </script>
+</body>
+</html>

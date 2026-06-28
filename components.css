@@ -1,0 +1,1175 @@
+/* components.css — KPI cards, badges, tables, deltas, skeletons.
+   Defined in tasks 4.3 / 6.1. Placeholder created during scaffolding (task 1.1).
+   Load order contract: tokens.css → layout.css → components.css → theme.css */
+/* ==========================================================================
+ * Skeleton loader (Req 11.2) — CSS-only linear-gradient shimmer.
+ * Used by renderWithSkeleton() while a data container awaits content.
+ * Colors via tokens only; zero literal colors.
+ * ======================================================================== */
+
+@keyframes gl-skeleton-shimmer {
+  0%   { background-position: 200% 0; }
+  100% { background-position: -200% 0; }
+}
+
+.gl-skeleton {
+  border-radius: var(--space-1);
+  background-color: var(--border-color);
+  background-image: linear-gradient(
+    90deg,
+    var(--border-color) 0%,
+    var(--bg-card) 50%,
+    var(--border-color) 100%
+  );
+  background-size: 200% 100%;
+  background-repeat: no-repeat;
+  animation: gl-skeleton-shimmer 1.4s ease-in-out infinite;
+}
+
+/* A single shimmer line; stack several to mimic a loading table/list. */
+.gl-skeleton-row {
+  height: var(--space-4);
+  margin-bottom: var(--space-3);
+}
+
+.gl-skeleton-row:last-child {
+  margin-bottom: 0;
+}
+
+/* ==========================================================================
+ * Error state (Req 11.3) — consumed by buildErrorState() (task 4.2).
+ * 1px solid --danger border, bi-exclamation-triangle icon in --danger,
+ * message text in --font-mono, inline "Retry?" link in --accent.
+ * ======================================================================== */
+
+.gl-error-state {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  padding: var(--card-padding);
+  border: 1px solid var(--danger);
+  border-radius: var(--space-2);
+  background-color: var(--bg-card);
+  font-family: var(--font-mono);
+  color: var(--text);
+}
+
+.gl-error-state .gl-error-icon,
+.gl-error-state .bi-exclamation-triangle {
+  color: var(--danger);
+  font-size: var(--space-5);
+  line-height: 1;
+  flex-shrink: 0;
+}
+
+.gl-error-state .gl-error-message {
+  font-family: var(--font-mono);
+  color: var(--text);
+}
+
+.gl-error-state .gl-error-retry {
+  margin-left: var(--space-2);
+  color: var(--accent);
+  font-family: var(--font-mono);
+  text-decoration: underline;
+  cursor: pointer;
+}
+
+.gl-error-state .gl-error-retry:focus-visible {
+  outline: none;
+  box-shadow: var(--focus-ring);
+}
+
+/* ==========================================================================
+ * Reduced motion (TokenSystem reduced-motion note) — disable the shimmer
+ * animation and fall back to a static --border-color block.
+ * ======================================================================== */
+
+@media (prefers-reduced-motion: reduce) {
+  .gl-skeleton {
+    animation: none;
+    background-image: none;
+    background-color: var(--border-color);
+  }
+}
+
+/* ==========================================================================
+ * KPI cards (Req 4.2, 4.3, 4.9) — consumed by render.js renderKpiRow().
+ * Token-only; zero literal colors. Card radius uses var(--space-2) to match
+ * the existing convention in this file (no --radius token is defined).
+ * ======================================================================== */
+
+/* KPI row grid: 3 cols → 2 at sm → 1 below sm (Req 4.9). */
+.gl-kpi-row {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: var(--space-4);
+}
+
+@media (max-width: 767.98px) {
+  .gl-kpi-row {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (max-width: 575.98px) {
+  .gl-kpi-row {
+    grid-template-columns: 1fr;
+  }
+}
+
+.gl-kpi-card {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  padding: var(--card-padding);
+  background-color: var(--bg-card);
+  border: var(--border);
+  border-radius: var(--space-2);
+  box-shadow: var(--elevation-1);
+}
+
+/* Layer-1 categorical icon: top-right, 18px, --text-muted (Req 4.2). */
+.gl-kpi-card__icon {
+  position: absolute;
+  top: var(--space-4);
+  right: var(--space-4);
+  font-size: 18px;
+  line-height: 1;
+  color: var(--text-muted);
+}
+
+/* Label: DM Sans 11px / 500, uppercase, 0.08em tracking. Reserve room for the icon. */
+.gl-kpi-card__label {
+  font-family: var(--font-ui);
+  font-size: 11px;
+  font-weight: 500;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--text-muted);
+  padding-right: var(--space-6);
+}
+
+/* Value: JetBrains Mono 28px / 500 (Req 4.3). */
+.gl-kpi-card__value {
+  font-family: var(--font-mono);
+  font-size: 28px;
+  font-weight: 500;
+  line-height: 1.1;
+  color: var(--text);
+}
+
+.gl-kpi-card__delta {
+  margin-top: var(--space-1);
+}
+
+/* ==========================================================================
+ * Delta indicator (Req 4.4–4.8, 14.1) — render.js renderDelta().
+ * Color class + arrow icon + value text, always together (Property 8).
+ * Color classes are decoupled from direction so the Pending inversion and the
+ * Withdrawals --warning override map cleanly onto the same arrow logic.
+ * ======================================================================== */
+
+.gl-delta {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-1);
+  font-family: var(--font-mono);
+  font-size: 12px;
+  font-weight: 500;
+  line-height: 1;
+}
+
+.gl-delta .bi {
+  font-size: 14px;
+  line-height: 1;
+}
+
+.gl-delta__value {
+  font-family: var(--font-mono);
+}
+
+.gl-delta--success {
+  color: var(--success);
+}
+
+.gl-delta--warning {
+  color: var(--warning);
+}
+
+.gl-delta--danger {
+  color: var(--danger);
+}
+
+/* ==========================================================================
+ * Status badge (Req 5.2, 5.3, 14.2, 14.3) — render.js renderStatusBadge().
+ * Colored dot + text label; label alone identifies the status (Property 9).
+ * Badge text in JetBrains Mono 11px / 500.
+ * ======================================================================== */
+
+.gl-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+  font-family: var(--font-mono);
+  font-size: 11px;
+  font-weight: 500;
+  line-height: 1;
+  white-space: nowrap;
+}
+
+.gl-badge__dot {
+  width: var(--space-2);
+  height: var(--space-2);
+  border-radius: 50%;
+  flex-shrink: 0;
+  background-color: var(--text-muted);
+}
+
+.gl-badge__label {
+  font-family: var(--font-mono);
+  color: var(--text);
+}
+
+.gl-badge--success .gl-badge__dot {
+  background-color: var(--success);
+}
+
+.gl-badge--warning .gl-badge__dot {
+  background-color: var(--warning);
+}
+
+.gl-badge--danger .gl-badge__dot {
+  background-color: var(--danger);
+}
+
+.gl-badge--neutral .gl-badge__dot {
+  background-color: var(--text-muted);
+}
+
+/* ==========================================================================
+ * Visually-hidden helper — exposes delta/badge state as programmatically
+ * determinable text for assistive tech (Req 14.5) without affecting layout.
+ * ======================================================================== */
+
+.gl-visually-hidden {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+/* ==========================================================================
+ * Page title (Req 12) — Overview <h1>. DM Sans 24px / 700. Token-only.
+ * ======================================================================== */
+
+.gl-page-title {
+  margin: 0 0 var(--space-5) 0;
+  font-family: var(--font-ui);
+  font-size: 24px;
+  font-weight: 700;
+  line-height: 1.2;
+  color: var(--text);
+}
+
+/* ==========================================================================
+ * Panel — card surface for Row-2 sections (Recent Transactions, donut).
+ * Token-only; mirrors the KPI card surface treatment.
+ * ======================================================================== */
+
+.gl-panel {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  padding: var(--card-padding);
+  background-color: var(--bg-card);
+  border: var(--border);
+  border-radius: var(--space-2);
+  box-shadow: var(--elevation-1);
+}
+
+.gl-panel-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-3);
+  margin-bottom: var(--space-4);
+}
+
+.gl-panel-title {
+  margin: 0;
+  font-family: var(--font-ui);
+  font-size: 13px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--text);
+}
+
+/* "VIEW ALL →" link in the section header. */
+.gl-view-all {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  font-weight: 500;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--accent);
+  text-decoration: none;
+  white-space: nowrap;
+}
+
+.gl-view-all:hover {
+  text-decoration: underline;
+}
+
+.gl-view-all:focus-visible {
+  outline: none;
+  box-shadow: var(--focus-ring);
+  border-radius: var(--space-1);
+}
+
+/* ==========================================================================
+ * Data table modifier (Req 5.1, 5.4, 5.5, 5.6) — extends Bootstrap .table
+ * rather than redefining it. Header in DM Sans 11px uppercase muted; mono
+ * identifier/amount cells; right-aligned amount; row borders via --border.
+ * Token-only; zero literal colors.
+ * ======================================================================== */
+
+.gl-table {
+  width: 100%;
+  margin: 0;
+  border-collapse: collapse;
+  font-family: var(--font-ui);
+  color: var(--text);
+}
+
+.gl-table thead th {
+  font-family: var(--font-ui);
+  font-size: 11px;
+  font-weight: 500;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--text-muted);
+  text-align: left;
+  padding: var(--space-2) var(--space-3);
+  border-bottom: var(--border);
+  white-space: nowrap;
+}
+
+.gl-table tbody td {
+  font-size: 13px;
+  padding: var(--space-3);
+  border-bottom: var(--border);
+  vertical-align: middle;
+  color: var(--text);
+}
+
+.gl-table tbody tr:last-child td {
+  border-bottom: 0;
+}
+
+/* Monospaced identifier columns (TXN ID, ACCOUNT). */
+.gl-table__mono {
+  font-family: var(--font-mono);
+  font-size: 12px;
+  color: var(--text);
+}
+
+/* Amount: mono, right-aligned (Req 5.6). */
+.gl-table__amount {
+  font-family: var(--font-mono);
+  font-size: 12px;
+  text-align: right;
+  white-space: nowrap;
+  color: var(--text);
+}
+
+.gl-table thead th.gl-table__amount {
+  text-align: right;
+}
+
+/* Timestamp cell stays mono + muted for terminal density. */
+.gl-table__time {
+  font-family: var(--font-mono);
+  font-size: 12px;
+  color: var(--text-muted);
+  white-space: nowrap;
+}
+
+/* ==========================================================================
+ * Analytics page (task 7.2) — page head, date-range filter, chart cards.
+ * Token-only; zero literal colors and zero inline styles. The ApexCharts
+ * instances themselves resolve their colors at runtime from CSS tokens via
+ * getComputedStyle (ApexCharts options are JS and cannot use var()).
+ * ======================================================================== */
+
+/* Page head: title on the left, Date_Range_Filter on the right (wraps on sm). */
+.gl-page-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: var(--space-3);
+  margin-bottom: var(--space-5);
+}
+
+/* Inside a page head the title's own bottom margin is removed — the
+   .gl-page-head container owns the spacing below the row (single canonical
+   .gl-page-title rule lives in the "Page title" section above: 24px / 700). */
+.gl-page-head .gl-page-title {
+  margin-bottom: 0;
+}
+
+/* Date_Range_Filter (Req 7.4, 7.5): segmented control; active option distinguished. */
+.gl-range-filter {
+  display: inline-flex;
+  gap: var(--space-1);
+  padding: var(--space-1);
+  background-color: var(--bg-card);
+  border: var(--border);
+  border-radius: var(--space-2);
+}
+
+.gl-range-btn {
+  font-family: var(--font-ui);
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--text-muted);
+  background: transparent;
+  border: none;
+  border-radius: var(--space-1);
+  padding: var(--space-2) var(--space-3);
+  cursor: pointer;
+}
+
+.gl-range-btn:hover {
+  color: var(--text);
+}
+
+/* Active option: accent fill + card-colored label, clearly distinct from inactive. */
+.gl-range-btn.is-active {
+  color: var(--bg-card);
+  background-color: var(--accent);
+}
+
+.gl-range-btn:focus-visible {
+  outline: none;
+  box-shadow: var(--focus-ring);
+}
+
+/* Chart surface card. */
+.gl-chart-card {
+  margin-bottom: var(--space-4);
+  padding: var(--card-padding);
+  background-color: var(--bg-card);
+  border: var(--border);
+  border-radius: var(--space-2);
+  box-shadow: var(--elevation-1);
+}
+
+/* Equal-height cards when sitting side-by-side in a Bootstrap row. */
+.gl-chart-card--fill {
+  height: 100%;
+  margin-bottom: 0;
+}
+
+.gl-chart-title {
+  margin: 0 0 var(--space-4);
+  font-family: var(--font-ui);
+  font-size: 11px;
+  font-weight: 500;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--text-muted);
+}
+
+/* Spacing between the side-by-side row and the full-width cards around it. */
+.gl-chart-row {
+  margin-bottom: var(--space-4);
+}
+
+/* ==========================================================================
+ * Auth pages (Req 10.1–10.9, 15.5) — login / register / forgot-password.
+ * Full-page CENTERED layout: no sidebar, no topbar, no shell JS modules.
+ * Token-only; zero literal colors and zero inline styles. Primary submit
+ * buttons opt into full width via .gl-btn-primary--block (see the canonical
+ * .gl-btn-primary base in the "Primary button" section below).
+ * ======================================================================== */
+
+/* Centering wrapper fills the viewport over the page background. */
+.gl-auth-wrap {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 100vh;
+  padding: var(--space-5);
+  background-color: var(--bg-content);
+}
+
+/* The centered card surface. */
+.gl-auth-card {
+  width: 100%;
+  max-width: 400px;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-5);
+  padding: var(--space-6);
+  background-color: var(--bg-card);
+  border: var(--border);
+  border-radius: var(--space-3);
+  box-shadow: var(--elevation-1);
+}
+
+/* Brand block: "GL" monogram + "greylux" wordmark, centered at the top. */
+.gl-auth-brand {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-2);
+}
+
+.gl-auth-monogram {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: var(--space-7);
+  height: var(--space-7);
+  border-radius: var(--space-2);
+  background-color: var(--accent);
+  color: var(--bg-card);
+  font-family: var(--font-mono);
+  font-size: 20px;
+  font-weight: 600;
+  line-height: 1;
+}
+
+.gl-auth-wordmark {
+  font-family: var(--font-ui);
+  font-size: 18px;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+  color: var(--text);
+}
+
+/* Optional heading + supporting copy under the brand. */
+.gl-auth-heading {
+  margin: 0;
+  font-family: var(--font-ui);
+  font-size: 16px;
+  font-weight: 700;
+  text-align: center;
+  color: var(--text);
+}
+
+.gl-auth-subtext {
+  margin: var(--space-1) 0 0;
+  font-family: var(--font-ui);
+  font-size: 13px;
+  text-align: center;
+  color: var(--text-muted);
+}
+
+/* Form layout: stacked fields. */
+.gl-auth-form {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+}
+
+.gl-field {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+}
+
+.gl-label {
+  font-family: var(--font-ui);
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--text);
+}
+
+/* Inputs: 44px min height, token surface/border, visible focus ring. */
+.gl-input {
+  width: 100%;
+  min-height: 44px;
+  padding: var(--space-2) var(--space-3);
+  font-family: var(--font-ui);
+  font-size: 14px;
+  color: var(--text);
+  background-color: var(--bg-card);
+  border: var(--border);
+  border-radius: var(--space-2);
+}
+
+.gl-input::placeholder {
+  color: var(--text-muted);
+}
+
+.gl-input:focus-visible {
+  outline: none;
+  box-shadow: var(--focus-ring);
+  border-color: var(--accent);
+}
+
+/* "Remember me" inline checkbox row. */
+.gl-checkbox-row {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+}
+
+.gl-checkbox {
+  width: var(--space-4);
+  height: var(--space-4);
+  flex-shrink: 0;
+  accent-color: var(--accent);
+}
+
+.gl-checkbox:focus-visible {
+  outline: none;
+  box-shadow: var(--focus-ring);
+}
+
+.gl-checkbox-label {
+  font-family: var(--font-ui);
+  font-size: 13px;
+  color: var(--text);
+}
+
+/* ==========================================================================
+ * Primary button (.gl-btn-primary) — SINGLE canonical base used by both auth
+ * pages and Settings. Auto width + left-aligned by default (correct for the
+ * Settings "Save Changes" button, Req 9.1). Fill uses the --bg-action /
+ * --text-on-action tokens (token-only; zero literal colors). Auth forms opt
+ * into full width via the .gl-btn-primary--block modifier.
+ * ======================================================================== */
+.gl-btn-primary {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 44px;
+  padding: var(--space-2) var(--space-5);
+  font-family: var(--font-ui);
+  font-size: 12px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--text-on-action);
+  background-color: var(--bg-action);
+  border: 1px solid var(--bg-action);
+  border-radius: var(--space-2);
+  cursor: pointer;
+}
+
+.gl-btn-primary:hover {
+  filter: brightness(0.95);
+}
+
+.gl-btn-primary:focus-visible {
+  outline: none;
+  box-shadow: var(--focus-ring);
+}
+
+/* Full-width variant — single-purpose auth forms (login / register / forgot). */
+.gl-btn-primary--block {
+  width: 100%;
+}
+
+/* Footer links area (Forgot password / Back to sign in). */
+.gl-auth-links {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-2);
+}
+
+.gl-auth-link {
+  font-family: var(--font-ui);
+  font-size: 13px;
+  color: var(--accent);
+  text-decoration: none;
+}
+
+.gl-auth-link:hover {
+  text-decoration: underline;
+}
+
+.gl-auth-link:focus-visible {
+  outline: none;
+  box-shadow: var(--focus-ring);
+  border-radius: var(--space-1);
+}
+
+/* Inline success message that replaces the forgot-password form (Req 10.7). */
+.gl-auth-success {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--space-3);
+  padding: var(--card-padding);
+  border: 1px solid var(--success);
+  border-radius: var(--space-2);
+  background-color: var(--bg-card);
+  font-family: var(--font-ui);
+  font-size: 14px;
+  color: var(--text);
+}
+
+.gl-auth-success .bi-check-circle {
+  color: var(--success);
+  font-size: var(--space-5);
+  line-height: 1;
+  flex-shrink: 0;
+}
+
+/* ==========================================================================
+ * Settings page (task 10.1, Req 9.1–9.4) — Profile, Security, Preferences,
+ * Notifications. Each section reuses the .gl-panel surface. Form controls
+ * extend Bootstrap (.form-control / .form-select / .btn / .form-switch) and
+ * are re-skinned with tokens only: zero literal colors, zero inline styles.
+ * Interactive controls keep a >=44px target and a :focus-visible ring.
+ * ======================================================================== */
+
+/* Vertical stack of section panels; constrained width for form readability. */
+.gl-settings-stack {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+  max-width: 760px;
+}
+
+/* Settings panels stack (height: auto) rather than fill a grid cell. */
+.gl-panel--settings {
+  height: auto;
+}
+
+/* --- Labelled inputs (Profile, Security) -------------------------------- */
+
+.gl-form-grid {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+}
+
+.gl-form-group {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+}
+
+/* Visible field label (never placeholder-only). DM Sans 12px / 500. */
+.gl-form-label {
+  font-family: var(--font-ui);
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--text);
+}
+
+/* Token re-skin of Bootstrap .form-control: token colors + 44px min height. */
+.gl-form-control {
+  min-height: 44px;
+  font-family: var(--font-ui);
+  font-size: 13px;
+  color: var(--text);
+  background-color: var(--bg-card);
+  border: var(--border);
+  border-radius: var(--space-2);
+}
+
+.gl-form-control::placeholder {
+  color: var(--text-muted);
+}
+
+.gl-form-control:focus {
+  color: var(--text);
+  background-color: var(--bg-card);
+  border-color: var(--accent);
+  outline: none;
+  box-shadow: var(--focus-ring);
+}
+
+.gl-form-control:focus-visible {
+  outline: none;
+  box-shadow: var(--focus-ring);
+}
+
+/* Read-only Role field: muted text + page-surface fill, distinct from editable. */
+.gl-form-control--readonly,
+.gl-form-control--readonly:focus {
+  color: var(--text-muted);
+  background-color: var(--bg-content);
+  box-shadow: none;
+  cursor: default;
+}
+
+/* --- Primary button (.gl-btn-primary) ----------------------------------- */
+/* The canonical .gl-btn-primary base lives in the "Primary button" section
+   above (auto width, left-aligned, accent-filled via --bg-action). The
+   Settings "Save Changes" button uses that base directly, and .gl-form-actions
+   left-aligns it within the panel (Req 9.1 — not full-width). */
+.gl-form-actions {
+  display: flex;
+  justify-content: flex-start;
+  margin-top: var(--space-5);
+}
+
+/* --- Setting rows (toggles + select) ------------------------------------ */
+/* Label/sub-label on the left, control on the right; hairline divider between. */
+.gl-setting-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-4);
+  min-height: 44px;
+  padding: var(--space-3) 0;
+  border-top: var(--border);
+}
+
+/* First row in a panel that follows a form grid still reads as a divider; the
+   first row directly under the header should not show a top rule. */
+.gl-panel-header + .gl-setting-row {
+  border-top: 0;
+}
+
+.gl-setting-copy {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+  min-width: 0;
+}
+
+.gl-setting-label {
+  margin: 0;
+  font-family: var(--font-ui);
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--text);
+}
+
+.gl-setting-sub {
+  margin: 0;
+  font-family: var(--font-ui);
+  font-size: 12px;
+  color: var(--text-muted);
+}
+
+/* Disabled (Notifications placeholder): reduced emphasis via opacity (no color). */
+.gl-setting-row.is-disabled {
+  opacity: 0.6;
+}
+
+/* --- Form switch (Bootstrap .form-switch) re-skin ----------------------- */
+/* Wrapper keeps a 44px touch target; checked state uses the accent token. */
+.gl-switch {
+  display: flex;
+  align-items: center;
+  min-height: 44px;
+  margin: 0;
+  padding-left: 0;
+}
+
+.gl-switch .form-check-input {
+  width: 2.5em;
+  height: 1.4em;
+  margin: 0;
+  cursor: pointer;
+  background-color: var(--border-color);
+  border: var(--border);
+}
+
+.gl-switch .form-check-input:checked {
+  background-color: var(--accent);
+  border-color: var(--accent);
+}
+
+.gl-switch .form-check-input:focus,
+.gl-switch .form-check-input:focus-visible {
+  outline: none;
+  box-shadow: var(--focus-ring);
+  border-color: var(--accent);
+}
+
+.gl-switch .form-check-input:disabled {
+  cursor: not-allowed;
+}
+
+/* --- Date Format select re-skin ----------------------------------------- */
+.gl-form-select {
+  min-height: 44px;
+  width: auto;
+  min-width: 160px;
+  font-family: var(--font-mono);
+  font-size: 12px;
+  color: var(--text);
+  background-color: var(--bg-card);
+  border: var(--border);
+  border-radius: var(--space-2);
+}
+
+.gl-form-select:focus,
+.gl-form-select:focus-visible {
+  color: var(--text);
+  background-color: var(--bg-card);
+  border-color: var(--accent);
+  outline: none;
+  box-shadow: var(--focus-ring);
+}
+
+/* --- Notifications header (icon + "not configured" note) ---------------- */
+.gl-notif-header {
+  flex-wrap: wrap;
+}
+
+.gl-panel-title .bi {
+  margin-right: var(--space-2);
+}
+
+.gl-notif-note {
+  font-family: var(--font-ui);
+  font-size: 12px;
+  color: var(--text-muted);
+}
+
+/* ==========================================================================
+ * Users page (task 9.2) — tabs, filter bar, pagination, empty state, action
+ * button. Reuses .gl-table and .gl-badge. Token-only; zero literal colors and
+ * zero inline styles. 44px min touch targets on tab + action buttons.
+ * ======================================================================== */
+
+/* Tab control (Req 8.1, 8.2) — role=tablist of role=tab buttons. Active tab is
+   driven by [aria-selected="true"] so the visual always tracks programmatic state. */
+.gl-tabs {
+  display: flex;
+  gap: var(--space-1);
+  margin-bottom: var(--space-5);
+  border-bottom: var(--border);
+}
+
+.gl-tab {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+  min-height: 44px;
+  padding: var(--space-2) var(--space-4);
+  font-family: var(--font-ui);
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--text-muted);
+  background: transparent;
+  border: none;
+  border-bottom: 2px solid transparent;
+  margin-bottom: -1px;
+  cursor: pointer;
+}
+
+.gl-tab:hover {
+  color: var(--text);
+}
+
+.gl-tab[aria-selected="true"] {
+  color: var(--accent);
+  border-bottom-color: var(--accent);
+}
+
+.gl-tab:focus-visible {
+  outline: none;
+  box-shadow: var(--focus-ring);
+  border-radius: var(--space-1);
+}
+
+.gl-tab .bi {
+  font-size: 14px;
+  line-height: 1;
+}
+
+/* Filter bar (Req 8.5, 8.6, 8.7) — search input + status/type dropdowns. */
+.gl-filter-bar {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-3);
+  margin-bottom: var(--space-4);
+}
+
+.gl-filter-search {
+  position: relative;
+  display: flex;
+  align-items: center;
+  flex: 1 1 280px;
+  min-width: 200px;
+}
+
+.gl-filter-search .bi {
+  position: absolute;
+  left: var(--space-3);
+  font-size: 14px;
+  line-height: 1;
+  color: var(--text-muted);
+  pointer-events: none;
+}
+
+.gl-filter-input {
+  width: 100%;
+  min-height: 44px;
+  padding: var(--space-2) var(--space-3) var(--space-2) var(--space-6);
+  font-family: var(--font-ui);
+  font-size: 13px;
+  color: var(--text);
+  background-color: var(--bg-card);
+  border: var(--border);
+  border-radius: var(--space-2);
+}
+
+.gl-filter-input::placeholder {
+  color: var(--text-muted);
+}
+
+.gl-filter-select {
+  min-height: 44px;
+  padding: var(--space-2) var(--space-3);
+  font-family: var(--font-ui);
+  font-size: 13px;
+  color: var(--text);
+  background-color: var(--bg-card);
+  border: var(--border);
+  border-radius: var(--space-2);
+  cursor: pointer;
+}
+
+.gl-filter-input:focus-visible,
+.gl-filter-select:focus-visible {
+  outline: none;
+  box-shadow: var(--focus-ring);
+}
+
+/* Row action button (Req 8.10 ACTIONS) — icon button with a 44px touch target. */
+.gl-table__actions {
+  text-align: right;
+  white-space: nowrap;
+}
+
+.gl-action-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 44px;
+  height: 44px;
+  color: var(--text-muted);
+  background: transparent;
+  border: none;
+  border-radius: var(--space-1);
+  cursor: pointer;
+}
+
+.gl-action-btn:hover {
+  color: var(--accent);
+}
+
+.gl-action-btn:focus-visible {
+  outline: none;
+  box-shadow: var(--focus-ring);
+}
+
+.gl-action-btn .bi {
+  font-size: 16px;
+  line-height: 1;
+}
+
+/* Pagination (Req 8.8) — "Showing X–Y of Z" label + Previous/Next controls. */
+.gl-pagination {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: var(--space-3);
+  margin-top: var(--space-4);
+  padding-top: var(--space-3);
+  border-top: var(--border);
+}
+
+.gl-pagination__label {
+  font-family: var(--font-mono);
+  font-size: 12px;
+  color: var(--text-muted);
+}
+
+.gl-pagination__controls {
+  display: flex;
+  gap: var(--space-2);
+}
+
+.gl-pagination__btn {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-1);
+  min-height: 36px;
+  padding: var(--space-2) var(--space-3);
+  font-family: var(--font-ui);
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--text);
+  background-color: var(--bg-card);
+  border: var(--border);
+  border-radius: var(--space-2);
+  cursor: pointer;
+}
+
+.gl-pagination__btn:hover:not(:disabled) {
+  border-color: var(--accent);
+  color: var(--accent);
+}
+
+.gl-pagination__btn:disabled {
+  color: var(--text-muted);
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.gl-pagination__btn:focus-visible {
+  outline: none;
+  box-shadow: var(--focus-ring);
+}
+
+.gl-pagination__btn .bi {
+  font-size: 13px;
+  line-height: 1;
+}
+
+/* Empty state (Req 8) — shown when no records match the active filters. */
+.gl-empty-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-2);
+  padding: var(--space-7) var(--space-4);
+  text-align: center;
+  color: var(--text-muted);
+}
+
+.gl-empty-state .bi {
+  font-size: var(--space-6);
+  line-height: 1;
+  color: var(--text-muted);
+}
+
+.gl-empty-state__title {
+  margin: var(--space-2) 0 0;
+  font-family: var(--font-mono);
+  font-size: 13px;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  color: var(--text);
+}
+
+.gl-empty-state__hint {
+  margin: 0;
+  font-family: var(--font-ui);
+  font-size: 13px;
+  color: var(--text-muted);
+}
